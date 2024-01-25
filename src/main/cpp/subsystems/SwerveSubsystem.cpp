@@ -1,7 +1,14 @@
 #include "subsystems/SwerveSubsystem.h"
 #include <math.h>
+#include <frc/smartdashboard/smartdashboard.h>
 
-SwerveSubsystem::SwerveSubsystem() { m_gryo.Reset(); }
+SwerveSubsystem::SwerveSubsystem() { 
+    m_gryo.Reset(); 
+    SetName("Swerve Drive Subsystem");
+    frc::SmartDashboard::PutData("Driver",this);
+    const int motor[4] = {1,1,1,1};
+    frc::SmartDashboard::PutBooleanArray("Enabled Motors",motor);
+}
 
 void SwerveSubsystem::Periodic() { 
     m_encoderPositions[0] = { units::meter_t{ m_frontLeft.GetDrivePosition() }, frc::Rotation2d{ units::radian_t{ m_frontLeft.GetAnglePosition() } } };
@@ -28,9 +35,15 @@ void SwerveSubsystem::StopModules() {
     m_backRight.Stop();
 }
 void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4>* states) {
-    SwerveDrive::kDriveKinematics.DesaturateWheelSpeeds(states,5_mps);
-    m_frontLeft.SetState((*states)[0]);
-    m_frontRight.SetState((*states)[1]);
-    m_backLeft.SetState((*states)[2]);
-    m_backRight.SetState((*states)[3]);
+    SwerveDrive::kDriveKinematics.DesaturateWheelSpeeds(states,units::meters_per_second_t{ SwerveDrive::kPhysicalMoveMax });
+    const int motor[4] = {1,1,1,1};
+    std::vector<int> enabled{frc::SmartDashboard::GetBooleanArray("Enabled Motors",motor)};
+    if(enabled.at(0))
+        //m_frontLeft.SetState((*states)[0]);
+    if(enabled.at(1))
+        m_frontRight.SetState((*states)[1]);
+    if(enabled.at(2))
+        m_backLeft.SetState((*states)[2]);
+    if(enabled.at(3))
+        m_backRight.SetState((*states)[3]);
 }

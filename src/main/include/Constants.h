@@ -56,11 +56,13 @@ namespace SwerveDrive
 constexpr double kDriveDeadband = 0.05;
 constexpr double kDriveMoveSpeedMax = 2; //meters per sec
 constexpr double kDriveAngleSpeedMax = 0.5; //radians per sec
+constexpr double kPhysicalMoveMax = 5.01;//meters per sec, drive motors
 
 constexpr double kWheelDiameter = 0.0762; //meters
-constexpr double kAngleGearRatio = 12;
+constexpr double kDriveGearRatio = (1/5.08);
+constexpr double kAngleGearRatio = (1/12.0);
 //Angling PID control system
-constexpr double kPControl = 5;
+constexpr double kPControl = 0.5;
 constexpr double kIControl = 0;
 constexpr double kDControl = 0;
 //Swerve Drive Kinematics, unfortunately can't be constexpr
