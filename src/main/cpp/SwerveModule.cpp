@@ -27,6 +27,7 @@ m_offset{offset}
     m_anglingPIDController.EnableContinuousInput(-M_PI,M_PI);
     frc::SmartDashboard::PutNumber("User Control ["+m_name+"]",1);
     ResetEncoders();
+    m_anglingEncoder.SetPosition(m_offset);
 }
 
 //Returns in meters
