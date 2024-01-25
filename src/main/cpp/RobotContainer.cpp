@@ -5,6 +5,7 @@
 #include "RobotContainer.h"
 
 #include <frc2/command/button/Trigger.h>
+#include <frc2/command/FunctionalCommand.h>
 
 #include "commands/SwerveDriveCommand.h"
 
@@ -26,5 +27,5 @@ void RobotContainer::ConfigureBindings() {
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
   // An example command will be run in autonomous
-
+  return frc2::FunctionalCommand{[]{return;},[]{return;},[](bool){return;},[]->bool{return true;}}.ToPtr(); 
 }

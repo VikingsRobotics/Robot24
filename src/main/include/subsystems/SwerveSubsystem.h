@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SwerveModule.h"
+#include "subsystems/SwerveModule.h"
 #include "Constants.h"
 
 #include <ctre/phoenix6/Pigeon2.hpp>
@@ -26,10 +26,10 @@ public:
 private:
   ctre::phoenix6::hardware::Pigeon2 m_gryo{CanBus::kGyroId,CanBus::kBusName};
 
-  SwerveModule m_frontLeft{CanBus::kFLDriveMotorId,CanBus::kFLAngleMotorId,CanBus::kFLDriveInvert,CanBus::kFLAngleInvert};
-  SwerveModule m_frontRight{CanBus::kFRDriveMotorId,CanBus::kFRAngleMotorId,CanBus::kFRDriveInvert,CanBus::kFRAngleInvert};
-  SwerveModule m_backLeft{CanBus::kBLDriveMotorId,CanBus::kBLAngleMotorId,CanBus::kBLDriveInvert,CanBus::kBLAngleInvert};
-  SwerveModule m_backRight{CanBus::kBRDriveMotorId,CanBus::kBRAngleMotorId,CanBus::kBRDriveInvert,CanBus::kBRAngleInvert};
+  SwerveModule m_frontLeft{CanBus::kFLDriveMotorId,CanBus::kFLAngleMotorId,CanBus::kFLDriveInvert,CanBus::kFLAngleInvert,-std::numbers::pi * 1/2,"Front Left"};
+  SwerveModule m_frontRight{CanBus::kFRDriveMotorId,CanBus::kFRAngleMotorId,CanBus::kFRDriveInvert,CanBus::kFRAngleInvert,0,"Front Right"};
+  SwerveModule m_backLeft{CanBus::kBLDriveMotorId,CanBus::kBLAngleMotorId,CanBus::kBLDriveInvert,CanBus::kBLAngleInvert,std::numbers::pi * 1/2,"Back Left"};
+  SwerveModule m_backRight{CanBus::kBRDriveMotorId,CanBus::kBRAngleMotorId,CanBus::kBRDriveInvert,CanBus::kBRAngleInvert,std::numbers::pi,"Back Right"};
 
   wpi::array<frc::SwerveModulePosition,4> m_encoderPositions{ wpi::empty_array };
   
