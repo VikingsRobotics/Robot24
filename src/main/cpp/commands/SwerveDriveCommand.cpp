@@ -9,7 +9,6 @@ m_xSpdFunc{xSpdFunc},m_ySpdFunc{ySpdFunc},m_aSpdFunc{aSpdFunc}
 {
     AddRequirements(m_subsystem);
     SetName("Swerve Drive Command");
-    //frc::SmartDashboard::PutData("Drive",this);
 }
 
 void SwerveDriveCommand::Execute() {
@@ -19,7 +18,11 @@ void SwerveDriveCommand::Execute() {
 
     wpi::array<frc::SwerveModuleState,4> moduleStates = SwerveDrive::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
         units::meters_per_second_t{ xSpeed },units::meters_per_second_t{ ySpeed },units::radians_per_second_t{ aSpeed },m_subsystem->GetRotation2d()));
-
+    for(int i = 0;i<moduleStates.size();++i)
+    {
+        frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());
+        frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] angle",moduleStates.at(i).angle.Degrees().value());
+    }
     m_subsystem->SetModulesState(&moduleStates);
 }
 
