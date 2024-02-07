@@ -1,5 +1,6 @@
 #include "subsystems/SwerveModule.h"
 #include <math.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 
 SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
@@ -34,7 +35,7 @@ SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
 
     // Set the PID gains for the turning motor. Note these are example gains, and
     // you may need to tune them for your own robot!
-    m_turningPIDController.SetP(SwerveDrive::kPControl);
+    m_turningPIDController.SetP(SwerveDrive::kTurningPControl);
     m_turningPIDController.SetI(0);
     m_turningPIDController.SetD(0);
     m_turningPIDController.SetFF(0);
@@ -67,7 +68,7 @@ void SwerveModule::ResetEncoders() {
 frc::SwerveModuleState SwerveModule::GetState() { return frc::SwerveModuleState{units::meters_per_second_t{ m_drivingTalonFx.GetVelocity().GetValue().value() },frc::Rotation2d{ units::radian_t{ m_turningAbsoluteEncoder.GetPosition() - m_chassisAngularOffset } } }; }
 frc::SwerveModulePosition SwerveModule::GetPosition() { return frc::SwerveModulePosition{units::meter_t{ m_drivingTalonFx.GetPosition().GetValue().value() },frc::Rotation2d{ units::radian_t{ m_turningAbsoluteEncoder.GetPosition() - m_chassisAngularOffset } } }; }
 void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
-    if( std::abs(desiredState.speed.value()) < 0.001 )
+    if( std::abs(desiredState.speed.value()) < 0.00001 )
     {
         Stop();
         return;
@@ -82,7 +83,9 @@ void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
         correctedDesiredState, frc::Rotation2d(units::radian_t{
                                     m_turningAbsoluteEncoder.GetPosition()}))};
 
-    m_drivingTalonFx.SetControl(ctre::phoenix6::controls::VelocityVoltage{(desiredState.speed * SwerveDrive::kWheelCircumeter)}.WithSlot(0));
+    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID())+"] rot out",desiredState.speed.value() / SwerveDrive::kWheelCircumeter.value());
+    m_drivingTalonFx.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t(desiredState.speed.value() / SwerveDrive::kWheelCircumeter.value())}.WithSlot(0));
+    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID())+"] volt out",m_drivingTalonFx.GetMotorVoltage().GetValue().value());
     m_turningPIDController.SetReference(
         optimizedDesiredState.angle.Radians().value(),
         rev::CANSparkMax::ControlType::kPosition);

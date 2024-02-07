@@ -12,12 +12,19 @@ m_xSpdFunc{xSpdFunc},m_ySpdFunc{ySpdFunc},m_aSpdFunc{aSpdFunc}
 }
 
 void SwerveDriveCommand::Execute() {
-    double xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband<double>(m_xSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
-    double ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband<double>(m_ySpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
-    double aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband<double>(m_aSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveAngleSpeedMax;
+    //auto -> units::meters_per_second_t & units::radians_per_second_t
+    auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
+    auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
+    auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveAngleSpeedMax;
+
+
+    frc::SmartDashboard::PutNumber("X Joystick",m_xSpdFunc());
+    frc::SmartDashboard::PutNumber("X Speed",xSpeed.value());
+    frc::SmartDashboard::PutNumber("Y Speed",ySpeed.value());
+    frc::SmartDashboard::PutNumber("A Speed",aSpeed.value());
 
     wpi::array<frc::SwerveModuleState,4> moduleStates = SwerveDrive::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
-        units::meters_per_second_t{ xSpeed },units::meters_per_second_t{ ySpeed },units::radians_per_second_t{ aSpeed },m_subsystem->GetRotation2d()));
+        xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()));
     for(int i = 0;i<moduleStates.size();++i)
     {
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());

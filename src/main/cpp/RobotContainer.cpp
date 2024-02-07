@@ -25,6 +25,7 @@ RobotContainer::RobotContainer() {
 
 void RobotContainer::ConfigureBindings() {
   // Configure your trigger bindings here
+  m_driverController.A().OnTrue(SwerveTesterCommand(&m_swerveSubsystem,m_driverController.B().Get()).ToPtr());
 }
 
 frc2::CommandPtr RobotContainer::GetAutonomousCommand() {

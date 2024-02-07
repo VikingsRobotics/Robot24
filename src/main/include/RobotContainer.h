@@ -9,6 +9,7 @@
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"
+#include "commands/SwerveTesterCommand.h"
 
 /**
  * This class is where the bulk of the robot should be declared.  Since

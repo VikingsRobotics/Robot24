@@ -85,7 +85,7 @@ void SwerveSubsystem::StopModules() {
     m_backRight.Stop();
 }
 void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4>* states) {
-    SwerveDrive::kDriveKinematics.DesaturateWheelSpeeds(states,units::meters_per_second_t{ SwerveDrive::kPhysicalMoveMax });
+    SwerveDrive::kDriveKinematics.DesaturateWheelSpeeds(states,SwerveDrive::kPhysicalMoveMax);
     m_frontLeft.SetState((*states)[0]);
     m_frontRight.SetState((*states)[1]);
     m_backLeft.SetState((*states)[2]);
