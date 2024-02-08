@@ -50,27 +50,24 @@ constexpr int KTalonResolution = 2048;
 
 namespace SwerveDrive
 {
+//Gear Ratio
+constexpr double kDriveGearRatio = 990/195.0;
+constexpr double kAngleGearRatio = 2 * std::numbers::pi;
 //Wheel Measurement
 constexpr units::inch_t kWheelDiameter = 3_in;
-constexpr units::meter_t kWheelCircumeter = kWheelDiameter * std::numbers::pi;
+constexpr units::meter_t kWheelCircumference = kWheelDiameter * std::numbers::pi;
+constexpr double kDriveSpeedToTurns = kDriveGearRatio/kWheelCircumference
 //Volt feedforward
 constexpr units::volt_t kStaticVoltage = 0.15_V;
 constexpr units::volt_t kVelocityVoltage = 9_V;
 constexpr double kVelocityPControl = 0.1;
-constexpr units::meters_per_second_t kPhysicalMoveMax = (110 * kWheelCircumeter)/1_s;
-
-//Gear Ratio
-constexpr double kDriveGearRatio = 990/195.0;
-constexpr double kAngleGearRatio = 2 * std::numbers::pi;
+constexpr units::meters_per_second_t kPhysicalMoveMax = (110 * kWheelCircumference)/1_s;
 //Angling PID control system
 constexpr double kTurningPControl = 1;
-
 //Drive Constants
 constexpr double kDriveDeadband = 0.05;
 constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
 constexpr units::radians_per_second_t kDriveAngleSpeedMax = 3.14_rad_per_s;
-
-
 //Swerve Drive Kinematics, unfortunately can't be constexpr
 //Motor distance from center in order fl, fr, bl, br
 const frc::SwerveDriveKinematics<4> kDriveKinematics{ frc::Translation2d{+15_in,+15_in}, frc::Translation2d{+15_in,-15_in},
