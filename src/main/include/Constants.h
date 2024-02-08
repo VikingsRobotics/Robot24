@@ -53,6 +53,9 @@ namespace SwerveDrive
 //Gear Ratio
 constexpr double kDriveGearRatio = 990/195.0;
 constexpr double kAngleGearRatio = 2 * std::numbers::pi;
+//Gear Ratio
+constexpr double kDriveGearRatio = 990/195.0;
+constexpr double kAngleGearRatio = 2 * std::numbers::pi;
 //Wheel Measurement
 constexpr units::inch_t kWheelDiameter = 3_in;
 constexpr units::meter_t kWheelCircumference = kWheelDiameter * std::numbers::pi;
@@ -61,7 +64,7 @@ constexpr double kDriveSpeedToTurns = kDriveGearRatio/kWheelCircumference.value(
 constexpr units::volt_t kStaticVoltage = 0.15_V;
 constexpr units::volt_t kVelocityVoltage = units::volt_t{12/108};
 constexpr double kVelocityPControl = 0.1;
-constexpr units::meters_per_second_t kPhysicalMoveMax = (110 * kWheelCircumference)/1_s;
+constexpr units::meters_per_second_t kPhysicalMoveMax = (108 * kWheelCircumference)/1_s;
 //Angling PID control system
 constexpr double kTurningPControl = 1;
 //Drive Constants
