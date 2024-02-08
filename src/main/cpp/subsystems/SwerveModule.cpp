@@ -51,7 +51,9 @@ SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
 
     ctre::phoenix6::configs::TalonFXConfiguration config{};
 
-    config.Feedback.WithSensorToMechanismRatio(SwerveDrive::kDriveGearRatio);
+    config.Voltage.WithPeakForwardVoltage(12).WithPeakReverseVoltage(-12);
+
+    config.Feedback.WithSensorToMechanismRatio(SwerveDrive::kDriveGearRatio); //Possible it does nothing, if so, just use DriveSpeedToTurns constant
     config.Slot0.WithKS(SwerveDrive::kStaticVoltage.value()).WithKV(SwerveDrive::kVelocityVoltage.value()).WithKP(SwerveDrive::kVelocityPControl);
 
     m_drivingTalonFx.GetConfigurator().Apply(config);
@@ -83,9 +85,9 @@ void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
         correctedDesiredState, frc::Rotation2d(units::radian_t{
                                     m_turningAbsoluteEncoder.GetPosition()}))};
 
-    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID())+"] rot out",desiredState.speed.value() / SwerveDrive::kWheelCircumeter.value());
-    m_drivingTalonFx.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t(desiredState.speed.value() / SwerveDrive::kWheelCircumeter.value())}.WithSlot(0));
-    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID())+"] volt out",m_drivingTalonFx.GetMotorVoltage().GetValue().value());
+    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID()/2)+"] rot out",desiredState.speed.value() / SwerveDrive::kWheelCircumference .value());
+    m_drivingTalonFx.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t(optimizedDesiredState.speed.value() / SwerveDrive::kWheelCircumference .value()/*if doesn't work, uncomment optimizedDesiredState.speed.value() * SwerveDrive::kDriveSpeedToTurns */)}.WithSlot(0));
+    frc::SmartDashboard::PutNumber("["+std::to_string(m_drivingTalonFx.GetDeviceID()/2)+"] volt out",m_drivingTalonFx.GetMotorVoltage().GetValue().value());
     m_turningPIDController.SetReference(
         optimizedDesiredState.angle.Radians().value(),
         rev::CANSparkMax::ControlType::kPosition);
