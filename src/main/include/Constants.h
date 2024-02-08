@@ -7,7 +7,6 @@
 #include <rev/CANSparkMax.h>
 #include <rev/AbsoluteEncoder.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
-#include <networktables/StructTopic.h>
 
 /**
  * The Constants header provides a convenient place for teams to hold robot-wide
@@ -41,9 +40,7 @@ constexpr int kBRAngleMotorId = 9;
 constexpr rev::CANSparkMax::MotorType kSparkMotorType = rev::CANSparkMax::MotorType::kBrushless;
 constexpr rev::SparkAbsoluteEncoder::Type kSparkAbsEncoderType = rev::SparkAbsoluteEncoder::Type::kDutyCycle;
 constexpr bool kInvertEncoder = true;
-
-
-constexpr int kSparkResolution = 42; //resolution = clicks per rotation
+constexpr int kSparkResolution = 42;
 //CRTE falcon 500 info
 constexpr int KTalonResolution = 2048;
 } // namespace CanBus
@@ -54,14 +51,15 @@ namespace SwerveDrive
 constexpr double kDriveGearRatio = 990/195.0;
 constexpr double kAngleGearRatio = 2 * std::numbers::pi;
 //Wheel Measurement
+constexpr units::turns_per_second_t kDriveRps = 108_tps;
 constexpr units::inch_t kWheelDiameter = 3_in;
 constexpr units::meter_t kWheelCircumference = kWheelDiameter * std::numbers::pi;
 constexpr double kDriveSpeedToTurns = kDriveGearRatio/kWheelCircumference.value();
 //Volt feedforward
 constexpr units::volt_t kStaticVoltage = 0.15_V;
-constexpr units::volt_t kVelocityVoltage = units::volt_t{12/108};
+constexpr units::volt_t kVelocityVoltage{12/kDriveRps.value()};
 constexpr double kVelocityPControl = 0.1;
-constexpr units::meters_per_second_t kPhysicalMoveMax = (110 * kWheelCircumference)/1_s;
+constexpr units::meters_per_second_t kPhysicalMoveMax{kDriveRps.value() * kWheelCircumference.value() / kDriveGearRatio};
 //Angling PID control system
 constexpr double kTurningPControl = 1;
 //Drive Constants
