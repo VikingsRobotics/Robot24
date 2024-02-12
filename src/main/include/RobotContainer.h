@@ -9,28 +9,37 @@
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"
-#include "commands/SwerveTesterCommand.h"
+
+#include <optional>
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
  * Command-based is a "declarative" paradigm, very little robot logic should
- * actually be handled in the {@link Robot} periodic methods (other than the
+ * actually be handled in the robot periodic methods (other than the
  * scheduler calls).  Instead, the structure of the robot (including subsystems,
  * commands, and trigger mappings) should be declared here.
  */
 class RobotContainer {
  public:
+  /**
+   * Constructs all of the storage for the robot
+  */
   RobotContainer();
-
-  frc2::CommandPtr GetAutonomousCommand();
+  //* @return CommandPtr for auto, TODO
+  std::optional<frc2::CommandPtr> GetAutonomousCommand();
 
  private:
-  // Replace with CommandPS4Controller or CommandJoystick if needed
+  //* XBox Controller connected first to the PC
   frc2::CommandXboxController m_driverController{
-      OperatorConstants::kDriverControllerPort};
+      Operator::kDriverControllerPort};
 
-  // The robot's subsystems are defined here...
+  //* Swerve Subsystem: Controls robot movement
   SwerveSubsystem m_swerveSubsystem;
+  //*
+  //TODO: GrabberSubsystem
+  //*
+  //TODO: ThrowerSubsystem
 
+  //* Config button bindings to controllers for NOW
   void ConfigureBindings();
 };

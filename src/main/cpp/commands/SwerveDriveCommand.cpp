@@ -1,38 +1,45 @@
 #include "commands/SwerveDriveCommand.h"
-#include <frc/MathUtil.h>
-#include "Constants.h"
-#include <frc/smartdashboard/smartdashboard.h>
 
-SwerveDriveCommand::SwerveDriveCommand(SwerveSubsystem* subsystem,std::function<double(void)> xSpdFunc,
-std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc) : m_subsystem{subsystem},
-m_xSpdFunc{xSpdFunc},m_ySpdFunc{ySpdFunc},m_aSpdFunc{aSpdFunc} 
+#include "Constants.h"
+
+#include <utility>
+
+#include <frc/MathUtil.h>
+#include <units/time.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+
+
+SwerveDriveCommand::SwerveDriveCommand(SwerveSubsystem* const subsystem,std::function<double(void)> xSpdFunc,
+    std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,
+    std::function<bool(void)> fieldFunc,double rateLimit) : m_subsystem{subsystem},
+m_xSpdFunc{std::move(xSpdFunc)},m_ySpdFunc{std::move(ySpdFunc)},m_aSpdFunc{std::move(aSpdFunc)},m_fieldFunc{std::move(fieldFunc)},
+m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLimit / 1_s},m_aLimiter{rateLimit / 1_s}
 {
+    // Adds to list of subsystem requirement so that only one command has access
     AddRequirements(m_subsystem);
+    // Set our own name
     SetName("Swerve Drive Command");
 }
 
 void SwerveDriveCommand::Execute() {
-    //auto -> units::meters_per_second_t & units::radians_per_second_t
-    auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
-    auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveMoveSpeedMax;
-    auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),SwerveDrive::kDriveDeadband)) * SwerveDrive::kDriveAngleSpeedMax;
-
-
-    frc::SmartDashboard::PutNumber("X Joystick",m_xSpdFunc());
-    frc::SmartDashboard::PutNumber("X Speed",xSpeed.value());
-    frc::SmartDashboard::PutNumber("Y Speed",ySpeed.value());
-    frc::SmartDashboard::PutNumber("A Speed",aSpeed.value());
-
-    wpi::array<frc::SwerveModuleState,4> moduleStates = SwerveDrive::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
+    // Calculate the speed after deadbanding the input and multiplying by teleop speed
+    auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
+    auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveAngleSpeedMax;
+    auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
+    // Puts the speed into the kinematics to get states
+    wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
         xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()));
-    for(int i = 0;i<moduleStates.size();++i)
+    // Loop all the state and display them to the dashboard
+    for(size_t i = 0;i<moduleStates.size();++i)
     {
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] angle",moduleStates.at(i).angle.Degrees().value());
     }
+    // Send the states to the swerve systems for the real world
     m_subsystem->SetModulesState(&moduleStates);
 }
 
 void SwerveDriveCommand::End(bool interrupted) {
+    // Tidy everything up, don't want the robot to keep moving
     m_subsystem->StopModules();
 }

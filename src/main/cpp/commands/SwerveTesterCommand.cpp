@@ -1,36 +1,44 @@
 #include "commands/SwerveTesterCommand.h"
+
 #include <frc/smartdashboard/SmartDashboard.h>
 
-SwerveTesterCommand::SwerveTesterCommand(SwerveSubsystem* subsystem,bool bDirection) : m_subsystem(subsystem), m_speed(bDirection ? 5 : 0), m_direction(m_direction) 
+#include "Constants.h"
+
+SwerveTesterCommand::SwerveTesterCommand(SwerveSubsystem* subsystem,bool bDirection,units::second_t time) : 
+    m_subsystem(subsystem), m_speed(bDirection ? Swerve::Mechanism::kPhysicalMoveMax.value() : 0), m_direction(bDirection),m_speeder(Swerve::Mechanism::kPhysicalMoveMax.value() / time) 
 {
+    // Adds to list of subsystem requirement so that only one command has access
     AddRequirements(subsystem);
 }
 
 void SwerveTesterCommand::Initialize()
 {
-    m_speeder.Reset(m_direction ? 5 : 0);
+    // Resets the position so the command can be used multiple times
+    m_speeder.Reset(m_direction ? Swerve::Mechanism::kPhysicalMoveMax.value() : 0);
 }
 
 void SwerveTesterCommand::Execute()
 {
+    // Gets the speed for this frame
     m_speed = m_speeder.Calculate(m_direction ? 0 : 5);
-    
-    wpi::array<frc::SwerveModuleState,4> moduleStates = SwerveDrive::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
-        units::meters_per_second_t { -m_speed }, 0_mps, 0_rad_per_s,m_subsystem->GetRotation2d()));
-    for(int i = 0;i<moduleStates.size();++i)
-    {
+    // Puts the speed into the kinematics to get states
+    wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds( 
+        units::meters_per_second_t { -m_speed }, 0_mps, 0_rad_per_s));
+    // Loop all the state and display them to the dashboard
+    for(size_t i = 0;i<moduleStates.size();++i)
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());
-        frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] angle",moduleStates.at(i).angle.Degrees().value());
-    }
+    // Send the states to the swerve systems for the real world
     m_subsystem->SetModulesState(&moduleStates);
 }
 
 bool SwerveTesterCommand::IsFinished()
 {
-    return m_direction ? (m_speed < 0.001) : (m_speed > 4.999);
+    // If the current speed is within 0.001 of their end goal speed, we unschedule ourself
+    return m_direction ? (m_speed < 0.001) : (m_speed > Swerve::Mechanism::kPhysicalMoveMax.value() - 0.001);
 }
 
 void SwerveTesterCommand::End(bool bInterupted)
 {
+    // Tidy everything up, don't want the robot to keep moving
     m_subsystem->StopModules();
 }

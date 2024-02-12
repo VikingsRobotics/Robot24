@@ -4,8 +4,16 @@
 
 #pragma once
 
+#include <units/velocity.h>
+#include <units/angular_velocity.h>
+#include <units/voltage.h>
+#include <units/length.h>
+
+#include <frc/geometry/Transform2d.h>
+
 #include <rev/CANSparkMax.h>
 #include <rev/AbsoluteEncoder.h>
+
 #include <frc/kinematics/SwerveDriveKinematics.h>
 
 /**
@@ -18,65 +26,100 @@
  * they are needed.
  */
 
-namespace OperatorConstants {
-
+namespace Operator {
+//* USB Port to the first controller connected to PC
 constexpr int kDriverControllerPort = 0;
-
+    namespace Drive
+    {
+    //* Prevents controller from running when under very low values
+    constexpr double kDriveDeadband = 0.05;
+    //* TeleOp drivers controlling movement speed
+    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
+    //* TeleOp drivers controlling angular speed
+    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 2.0_rad_per_s;
+    } // namespace Drive
 }  // namespace OperatorConstants
-
-namespace CanBus
+//* namespace for device IDs
+namespace Device
 {
-constexpr const char * kBusName = "rio"; // can be "", "rio",etc.
+//* CTRE: Bus name needed for constructors
+constexpr const char * kBusName = "rio";
+//* (CANBUS) ID for the Pigeon 2.0 (CTRE)
 constexpr int kGyroId = 1;
-constexpr int kFLDriveMotorId = 2; //FL = front left
+//* (CANBUS) ID for the Front Left Falcon 500 driving motor (CTRE)
+constexpr int kFLDriveMotorId = 2;
+//* (CANBUS) ID for the Front Left NEO 550 turning motor (REV)
 constexpr int kFLAngleMotorId = 3; 
-constexpr int kFRDriveMotorId = 4; //FR = front right
+//* (CANBUS) ID for the Front Right Falcon 500 driving motor (CTRE)
+constexpr int kFRDriveMotorId = 4;
+//* (CANBUS) ID for the Front Right NEO 550 turning motor (REV)
 constexpr int kFRAngleMotorId = 5;
-constexpr int kBLDriveMotorId = 6; //BL = back left
+//* (CANBUS) ID for the Back Left Falcon 500 driving motor (CTRE)
+constexpr int kBLDriveMotorId = 6;
+//* (CANBUS) ID for the Back Left NEO 550 turning motor (REV)
 constexpr int kBLAngleMotorId = 7;
-constexpr int kBRDriveMotorId = 8; //BR = back right
+//* (CANBUS) ID for the Back Right Falcon 500 driving motor (CTRE)
+constexpr int kBRDriveMotorId = 8;
+//* (CANBUS) ID for the Bacl Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
-//Rev neo 550 info
-constexpr rev::CANSparkMax::MotorType kSparkMotorType = rev::CANSparkMax::MotorType::kBrushless;
-constexpr rev::SparkAbsoluteEncoder::Type kSparkAbsEncoderType = rev::SparkAbsoluteEncoder::Type::kDutyCycle;
-constexpr bool kInvertEncoder = true;
-constexpr int kSparkResolution = 42;
-//CRTE falcon 500 info
-constexpr int KTalonResolution = 2048;
+    //* subnamespace for internal device info
+    namespace Internal
+    {
+    //* Default motor type used for spark max motors
+    constexpr rev::CANSparkMax::MotorType kSparkMotorType = rev::CANSparkMax::MotorType::kBrushless;
+    //* Default encoder type used for spark absolute encoders
+    constexpr rev::SparkAbsoluteEncoder::Type kSparkAbsEncoderType = rev::SparkAbsoluteEncoder::Type::kDutyCycle;
+    //* Invert absolute encoder to match direction of motor movement
+    constexpr bool kInvertEncoder = true;
+    //* @deprecated How many encoder ticks are in one rotation
+    constexpr int kSparkResolution = 42;
+    //* @deprecated How many encoder ticks are in one rotation
+    constexpr int KTalonResolution = 2048;
+    }
 } // namespace CanBus
-
-namespace SwerveDrive
+//* namespace containing all swerve module constants
+namespace Swerve
 {
-//Gear Ratio
-constexpr double kDriveGearRatio = 990/195.0;
-constexpr double kAngleGearRatio = 2 * std::numbers::pi;
-//Gear Ratio
-constexpr double kDriveGearRatio = 990/195.0;
-constexpr double kAngleGearRatio = 2 * std::numbers::pi;
-//Wheel Measurement
-constexpr units::turns_per_second_t kDriveRps = 108_tps;
-constexpr units::inch_t kWheelDiameter = 3_in;
-constexpr units::meter_t kWheelCircumference = kWheelDiameter * std::numbers::pi;
-constexpr double kDriveSpeedToTurns = kDriveGearRatio/kWheelCircumference.value();
-//Volt feedforward
-constexpr units::volt_t kStaticVoltage = 0.15_V;
-<<<<<<< HEAD
-constexpr units::volt_t kVelocityVoltage{12/kDriveRps.value()};
-constexpr double kVelocityPControl = 0.1;
-constexpr units::meters_per_second_t kPhysicalMoveMax{kDriveRps.value() * kWheelCircumference.value() / kDriveGearRatio};
-=======
-constexpr units::volt_t kVelocityVoltage = units::volt_t{12/108};
-constexpr double kVelocityPControl = 0.1;
-constexpr units::meters_per_second_t kPhysicalMoveMax = (108 * kWheelCircumference)/1_s;
->>>>>>> e0df568128227fd62889a2b38f7c73b7d9044b42
-//Angling PID control system
-constexpr double kTurningPControl = 1;
-//Drive Constants
-constexpr double kDriveDeadband = 0.05;
-constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
-constexpr units::radians_per_second_t kDriveAngleSpeedMax = 3.14_rad_per_s;
-//Swerve Drive Kinematics, unfortunately can't be constexpr
-//Motor distance from center in order fl, fr, bl, br
-const frc::SwerveDriveKinematics<4> kDriveKinematics{ frc::Translation2d{+15_in,+15_in}, frc::Translation2d{+15_in,-15_in},
-    frc::Translation2d{-15_in,+15_in}, frc::Translation2d{-15_in,-15_in} };
-} // namespace SwerveDrive
+    //* subnamespace containing all mechanism constants
+    namespace Mechanism
+    {
+    //* 990 motor teeth to 195 wheel teeth, converts motor rotations to wheel rotations
+    constexpr double kDriveGearRatio{990/195.0};
+    //* 1 rot to 2 pi radians, converts motor rotations to radians
+    constexpr double kAngleGearRatio{2 * std::numbers::pi};
+    //* Max 108 rotations per sec from driving motor, without gear ratios
+    constexpr units::turns_per_second_t kDriveRps{108};
+    //* Wheel diameter in inches, 3
+    constexpr units::inch_t kWheelDiameter{3};
+    //* Wheel circumference in meters, ~0.24
+    constexpr units::meter_t kWheelCircumference{kWheelDiameter * std::numbers::pi};
+    //* Converts meters to rotations, mps to rps, and mps^2 to rps^2, rotations = (meterTarget * gearRatio) / WheelCircumferenceMeters
+    constexpr double kDriveSpeedToTurns{kDriveGearRatio/kWheelCircumference.value()};
+    //* Converts rotations to meters, rps to mps, and rps^2 to mps^2, meters = (WheelCircumferenceMeters * rotationsTarget) / gearRatio
+    constexpr double kTurnsToDriveSpeed{kWheelCircumference.value()/kDriveGearRatio};
+    //* Min voltage required for driving motor to begin moving
+    constexpr units::volt_t kStaticVoltage{0.15};
+    //* kV for feedforward, target rotation is multipled kV and added to velocity control
+    constexpr units::volt_t kVelocityVoltage{12/kDriveRps.value()};
+    //* Max speed the wheel move, used to normialize swerve modules speeds to maintain control
+    constexpr units::meters_per_second_t kPhysicalMoveMax{kDriveRps.value() * kWheelCircumference.value() / kDriveGearRatio};
+    } // Mechanism
+    //* subnamespace contain all PID control sytems constants and kinematics constants
+    namespace System
+    {
+    //* Proportional term for velocity control system used by driving wheels
+    constexpr double kVelocityPControl{0.1};
+    //* Proportional term for position control system used by turning wheels
+    constexpr double kTurningPControl{1};
+    //* Distance between centers of right and left wheels on robot
+    constexpr units::inch_t kTrackWidth{15};
+    //* Distance between centers of front and back wheels on robot
+    constexpr units::inch_t kWheelBase{15};
+    /** 
+    * Swerve Kinematics, using positions of wheels to calculate desired states for swerve modules
+    * 
+    * Inputted from left front, right front, left back, right back
+    */
+    extern frc::SwerveDriveKinematics<4> kDriveKinematics;
+    } // namespace System
+} // namespace Swerve
