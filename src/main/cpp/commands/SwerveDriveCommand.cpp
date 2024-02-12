@@ -36,16 +36,8 @@ void SwerveDriveCommand::Execute() {
     auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveAngleSpeedMax;
     // Puts the speed into the kinematics to get states
     wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates( m_fieldFunc() ?
-<<<<<<< HEAD
         frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()) :
         frc::ChassisSpeeds(xSpeed,ySpeed,aSpeed));
-=======
-        frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d() :
-        frc::ChassisSpeeds(xSpeed,ySpeed,aSpeed)));
-    // Puts the speed into the kinematics to get states
-    wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
-        xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()));
->>>>>>> 43220dc93fc042be05a652af5a9e0cbcb7c07173
     // Loop all the state and display them to the dashboard
     for(size_t i = 0;i<moduleStates.size();++i)
     {
