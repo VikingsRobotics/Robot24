@@ -23,6 +23,7 @@ m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLimit / 1_s},m_aLimiter{rateLimit / 1
 
 void SwerveDriveCommand::Execute() {
     // Calculate the speed after deadbanding the input and multiplying by teleop speed
+<<<<<<< HEAD
     auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
     auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
     auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveAngleSpeedMax;
@@ -30,6 +31,14 @@ void SwerveDriveCommand::Execute() {
     wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates( m_fieldFunc() ?
         frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d() :
         frc::ChassisSpeeds(xSpeed,ySpeed,aSpeed)));
+=======
+    auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
+    auto aSpeed = -m_aLimiter.Calculate(frc::ApplyDeadband(m_aSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveAngleSpeedMax;
+    auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
+    // Puts the speed into the kinematics to get states
+    wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates(frc::ChassisSpeeds::FromFieldRelativeSpeeds( 
+        xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()));
+>>>>>>> a28b175 (Refactored and Documented Everything)
     // Loop all the state and display them to the dashboard
     for(size_t i = 0;i<moduleStates.size();++i)
     {
