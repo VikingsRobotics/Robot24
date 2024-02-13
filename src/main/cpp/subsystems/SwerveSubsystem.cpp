@@ -16,9 +16,13 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
 void SwerveSubsystem::Periodic() { 
     // Tracks robot position using the position of swerve modules and gryo rotation
     m_odometry.Update(GetRotation2d(),{m_frontLeft.GetPosition(),m_frontRight.GetPosition(),m_backLeft.GetPosition(),m_backRight.GetPosition()});
+    frc::SmartDashboard::PutNumber("Heading",GetHeading().value());
 }
 void SwerveSubsystem::ZeroHeading() { m_gryo.Reset(); }
-units::degree_t SwerveSubsystem::GetHeading() { return units::degree_t{m_gryo.GetAngle()}; }
+units::degree_t SwerveSubsystem::GetHeading() { 
+    double angle = m_gryo.GetAngle();
+    return units::degree_t{ std::fmod(angle < 0 ? -angle : angle ,360.0) }; 
+}
 frc::Rotation2d SwerveSubsystem::GetRotation2d() { return frc::Rotation2d{ GetHeading() }; }
 frc::Pose2d SwerveSubsystem::GetPose2d() { return m_odometry.GetPose(); }
 void SwerveSubsystem::ResetOdometry(frc::Pose2d pose) {

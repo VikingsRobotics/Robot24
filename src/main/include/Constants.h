@@ -34,9 +34,9 @@ constexpr int kDriverControllerPort = 0;
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
     //* TeleOp drivers controlling movement speed
-    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
+    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
     //* TeleOp drivers controlling angular speed
-    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 2.0_rad_per_s;
+    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 6.0_rad_per_s;
     } // namespace Drive
 }  // namespace OperatorConstants
 //* namespace for device IDs

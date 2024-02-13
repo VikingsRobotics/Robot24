@@ -8,7 +8,8 @@ SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
     : m_drivingTalonFx(drivingCANId, Device::kBusName),
       m_turningSparkMax(turningCANId, Device::Internal::kSparkMotorType),
       m_turningAbsoluteEncoder(m_turningSparkMax.GetAbsoluteEncoder(Device::Internal::kSparkAbsEncoderType)),
-      m_turningPIDController(m_turningSparkMax.GetPIDController())
+      m_turningPIDController(m_turningSparkMax.GetPIDController()),
+      m_chassisAngularOffset(chassisAngularOffset)
 {
     // Spark Max Settings
     
@@ -76,7 +77,7 @@ void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
     correctedDesiredState.speed = desiredState.speed;
     correctedDesiredState.angle =
         desiredState.angle +
-        frc::Rotation2d(units::radian_t{m_chassisAngularOffset});
+        frc::Rotation2d(m_chassisAngularOffset);
     // Make sure we are not rotating too much
     frc::SwerveModuleState optimizedDesiredState{frc::SwerveModuleState::Optimize(
         correctedDesiredState, frc::Rotation2d(units::radian_t{
