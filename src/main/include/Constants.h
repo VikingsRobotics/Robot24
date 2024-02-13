@@ -9,6 +9,8 @@
 #include <units/voltage.h>
 #include <units/length.h>
 
+#include <frc/PneumaticsModuleType.h>
+
 #include <frc/geometry/Transform2d.h>
 
 #include <rev/CANSparkMax.h>
@@ -75,6 +77,8 @@ constexpr int kBRAngleMotorId = 9;
     constexpr int kSparkResolution = 42;
     //* @deprecated How many encoder ticks are in one rotation
     constexpr int KTalonResolution = 2048;
+    //* Type of control module for the pneumatics
+    constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
     }
 } // namespace CanBus
 //* namespace containing all swerve module constants
