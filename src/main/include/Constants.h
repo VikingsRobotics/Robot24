@@ -64,6 +64,14 @@ constexpr int kBLAngleMotorId = 7;
 constexpr int kBRDriveMotorId = 8;
 //* (CANBUS) ID for the Back Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
+
+constexpr int kBottomMotorId = 0;
+
+constexpr int kLoaderMotorId = 0;
+
+constexpr int kTopRightMotorId = 0;
+
+constexpr int kTopLeftMotorId = 0;
 //* (CANBUS) ID for Pneumatics Solenoid (REV PH)
 constexpr int kPneumaticId = 0;
     //* subnamespace for internal device info
@@ -81,6 +89,8 @@ constexpr int kPneumaticId = 0;
     constexpr int KTalonResolution = 2048;
     //* Type of control module for the pneumatics
     constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
+
+    constexpr units::turn_t kRetreatDistance{-150};
     }
 } // namespace CanBus
 //* namespace containing all swerve module constants
