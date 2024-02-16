@@ -13,7 +13,7 @@ public:
      * 
      * @param channel id of the channel that the pneumatic solenoid is under
     */
-    PneumaticSubsystem(int channel);
+    PneumaticSubsystem();
     /** 
      * Toogles the solenoid if the compressor is full
      * 
@@ -34,7 +34,7 @@ public:
     bool IsPressurized();
 private:
     //* The solenoid with the id
-    frc::Solenoid m_solenoid;
+    frc::Solenoid m_solenoid{Device::Internal::kPneumaticType,Device::kPneumaticId};
     //* Universal compressor 
-    static frc::Compressor m_compressor;
+    frc::Compressor m_compressor{Device::Internal::kPneumaticType};
 };

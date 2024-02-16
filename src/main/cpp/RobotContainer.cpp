@@ -20,8 +20,9 @@ RobotContainer::RobotContainer() {
     [&]()->double{return m_driverController.GetRightY();},
     [&]()->double{return m_driverController.GetRightX();},
     [&]()->double{return m_driverController.GetLeftX();}));
+    
   // Put the command onto the dashboard so it can be scheduled if something take Swerve Subsystem
-  frc::SmartDashboard::PutData("Drive Command",m_swerveSubsystem.GetDefaultCommand());
+  frc::SmartDashboard::PutData("Drive Command", m_swerveSubsystem.GetDefaultCommand());
   // Sets the name of SwerveSubsystem, called "Swerve System"
   m_swerveSubsystem.SetName("Swerve System");
   
@@ -30,7 +31,7 @@ RobotContainer::RobotContainer() {
 
 void RobotContainer::ConfigureBindings() {
   // Triggers SwerveTesterCommand to run
-  m_driverController.A().OnTrue(SwerveTesterCommand(&m_swerveSubsystem,true,20_s).ToPtr());
+  m_driverController.A().OnTrue(SwerveTesterCommand(&m_swerveSubsystem, SwerveTesterCommand::MaxToZero, 20_s).ToPtr());
 }
 
 std::optional<frc2::CommandPtr> RobotContainer::GetAutonomousCommand() {

@@ -4,9 +4,7 @@
 
 #include "Constants.h"
 
-frc::Compressor PneumaticSubsystem::m_compressor{Device::Internal::kPneumaticType};
-
-PneumaticSubsystem::PneumaticSubsystem(int channel) : m_solenoid{Device::Internal::kPneumaticType,channel}
+PneumaticSubsystem::PneumaticSubsystem()
 {
     //Set our own name
     SetName("Pneumatics Subsystem");

@@ -84,6 +84,6 @@ private:
      * The prevous Swerve Module State sent to this module, used for
      * debugging.
     */
-    frc::SwerveModuleState m_desiredState{units::meters_per_second_t{0.0},
+    frc::SwerveModuleState m_previousState{units::meters_per_second_t{0.0},
                                             frc::Rotation2d()};
 };

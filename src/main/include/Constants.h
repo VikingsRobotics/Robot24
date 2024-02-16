@@ -62,8 +62,10 @@ constexpr int kBLDriveMotorId = 6;
 constexpr int kBLAngleMotorId = 7;
 //* (CANBUS) ID for the Back Right Falcon 500 driving motor (CTRE)
 constexpr int kBRDriveMotorId = 8;
-//* (CANBUS) ID for the Bacl Right NEO 550 turning motor (REV)
+//* (CANBUS) ID for the Back Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
+//* (CANBUS) ID for Pneumatics Solenoid (REV PH)
+constexpr int kPneumaticId = 0;
     //* subnamespace for internal device info
     namespace Internal
     {

@@ -54,18 +54,23 @@ SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
     m_drivingTalonFx.GetConfigurator().Apply(config);
 
     // Sets the state as current rotations
-    m_desiredState.angle = frc::Rotation2d(units::radian_t{m_turningAbsoluteEncoder.GetPosition()});
+    m_previousState.angle = frc::Rotation2d(units::radian_t{m_turningAbsoluteEncoder.GetPosition()});
     // Make sure the motor's encoders are set to 0
     ResetEncoders();
 }    
 
-void SwerveModule::ResetEncoders() {
+void SwerveModule::ResetEncoders()
+{
     // Reset the encoder to 0
     m_drivingTalonFx.SetPosition(units::angle::turn_t{ 0 });
 }
+
 frc::SwerveModuleState SwerveModule::GetState() { return frc::SwerveModuleState{units::meters_per_second_t{ m_drivingTalonFx.GetVelocity().GetValue().value() * Swerve::Mechanism::kTurnsToDriveSpeed },frc::Rotation2d{ units::radian_t{ m_turningAbsoluteEncoder.GetPosition() } - m_chassisAngularOffset } }; }
+
 frc::SwerveModulePosition SwerveModule::GetPosition() { return frc::SwerveModulePosition{units::meter_t{ m_drivingTalonFx.GetPosition().GetValue().value() * Swerve::Mechanism::kTurnsToDriveSpeed},frc::Rotation2d{ units::radian_t{ m_turningAbsoluteEncoder.GetPosition() } - m_chassisAngularOffset } }; }
-void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
+
+void SwerveModule::SetState(frc::SwerveModuleState desiredState) 
+{
     // If we are not moving, we don't reset back to origin
     if( std::abs(desiredState.speed.value()) < 0.00001 )
     {
@@ -92,9 +97,10 @@ void SwerveModule::SetState(frc::SwerveModuleState desiredState) {
         optimizedDesiredState.angle.Radians().value(),
         rev::CANSparkMax::ControlType::kPosition);
     // Remember the state for debugging
-    m_desiredState = desiredState;
+    m_previousState = desiredState;
 }
-void SwerveModule::Stop() {
+void SwerveModule::Stop() 
+{
     // Just stop movement
     m_drivingTalonFx.Set(0);
     m_turningSparkMax.Set(0);

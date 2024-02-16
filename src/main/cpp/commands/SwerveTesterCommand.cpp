@@ -4,7 +4,7 @@
 
 #include "Constants.h"
 
-SwerveTesterCommand::SwerveTesterCommand(SwerveSubsystem* subsystem,bool bDirection,units::second_t time) : 
+SwerveTesterCommand::SwerveTesterCommand(SwerveSubsystem* subsystem,RampDirection bDirection,units::second_t time) : 
     m_subsystem(subsystem), m_speed(bDirection ? Swerve::Mechanism::kPhysicalMoveMax.value() : 0), m_direction(bDirection),m_speeder(Swerve::Mechanism::kPhysicalMoveMax.value() / time) 
 {
     // Adds to list of subsystem requirement so that only one command has access
@@ -26,7 +26,9 @@ void SwerveTesterCommand::Execute()
         units::meters_per_second_t { -m_speed }, 0_mps, 0_rad_per_s));
     // Loop all the state and display them to the dashboard
     for(size_t i = 0;i<moduleStates.size();++i)
+    {
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());
+    }
     // Send the states to the swerve systems for the real world
     m_subsystem->SetModulesState(&moduleStates);
 }
