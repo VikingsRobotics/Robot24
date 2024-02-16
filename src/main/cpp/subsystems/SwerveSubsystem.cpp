@@ -1,34 +1,46 @@
 #include "subsystems/SwerveSubsystem.h"
 #include <math.h>
+#include <frc/smartdashboard/smartdashboard.h>
+#include <frc/smartdashboard/smartdashboard.h>
+#include <string>
 
-SwerveSubsystem::SwerveSubsystem() { m_gryo.Reset(); }
-
-void SwerveSubsystem::Periodic() { 
-    m_encoderPositions[0] = { units::meter_t{ m_frontLeft.GetDrivePosition() }, frc::Rotation2d{ units::radian_t{ m_frontLeft.GetAnglePosition() } } };
-    m_encoderPositions[1] = { units::meter_t{ m_frontRight.GetDrivePosition() }, frc::Rotation2d{ units::radian_t{ m_frontRight.GetAnglePosition() } } };
-    m_encoderPositions[2] = { units::meter_t{ m_backLeft.GetDrivePosition() }, frc::Rotation2d{ units::radian_t{ m_backLeft.GetAnglePosition() } } };
-    m_encoderPositions[3] = { units::meter_t{ m_backRight.GetDrivePosition() }, frc::Rotation2d{ units::radian_t{ m_backRight.GetAnglePosition() } } };
-    m_odometry.Update(GetRotation2d(),m_encoderPositions);
+SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematics,frc::Rotation2d{ units::radian_t{0} }, {m_frontLeft.GetPosition(),m_frontRight.GetPosition(),m_backLeft.GetPosition(),m_backRight.GetPosition()}} { 
+    // Make sure the current rotation is zero
+    m_gryo.Reset(); 
+    // Set our own name
+    SetName("Swerve Drive Subsystem");
+    // Publishes it to the dashboard
+    frc::SmartDashboard::PutData("Driver",this);
 }
 
+void SwerveSubsystem::Periodic() { 
+    // Tracks robot position using the position of swerve modules and gryo rotation
+    m_odometry.Update(GetRotation2d(),{m_frontLeft.GetPosition(),m_frontRight.GetPosition(),m_backLeft.GetPosition(),m_backRight.GetPosition()});
+    frc::SmartDashboard::PutNumber("Heading",GetHeading().value());
+}
 void SwerveSubsystem::ZeroHeading() { m_gryo.Reset(); }
-double SwerveSubsystem::GetHeading() { return std::fmod(m_gryo.GetAngle(),360); }
-
-frc::Rotation2d SwerveSubsystem::GetRotation2d() { return frc::Rotation2d{ units::degree_t{ GetHeading() } }; }
-
+units::degree_t SwerveSubsystem::GetHeading() { 
+    double angle = m_gryo.GetAngle();
+    return units::degree_t{ std::fmod(angle < 0 ? -angle : angle ,360.0) }; 
+}
+frc::Rotation2d SwerveSubsystem::GetRotation2d() { return frc::Rotation2d{ GetHeading() }; }
 frc::Pose2d SwerveSubsystem::GetPose2d() { return m_odometry.GetPose(); }
 void SwerveSubsystem::ResetOdometry(frc::Pose2d pose) {
-    m_odometry.ResetPosition(GetRotation2d(),m_encoderPositions,pose);
+    // Resets pose but still requires the current state of swerve module and gryo rotation
+    m_odometry.ResetPosition(GetRotation2d(),{m_frontLeft.GetPosition(),m_frontRight.GetPosition(),m_backLeft.GetPosition(),m_backRight.GetPosition()},pose);
 }
 
 void SwerveSubsystem::StopModules() {
+    // Calls every swerve modules Stop function
     m_frontLeft.Stop();
     m_frontRight.Stop();
     m_backLeft.Stop();
     m_backRight.Stop();
 }
 void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4>* states) {
-    SwerveDrive::kDriveKinematics.DesaturateWheelSpeeds(states,5_mps);
+    // Make sure that we are under max speed
+    Swerve::System::kDriveKinematics.DesaturateWheelSpeeds(states,Swerve::Mechanism::kPhysicalMoveMax);
+    // Calls every swerve modules SetStates function
     m_frontLeft.SetState((*states)[0]);
     m_frontRight.SetState((*states)[1]);
     m_backLeft.SetState((*states)[2]);
