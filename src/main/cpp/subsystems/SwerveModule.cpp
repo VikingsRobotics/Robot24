@@ -45,7 +45,7 @@ SwerveModule::SwerveModule(const int drivingCANId, const int turningCANId,
     // Sets the voltages to their nominal voltage
     config.Voltage.WithPeakForwardVoltage(12).WithPeakReverseVoltage(-12);
     // When doing control loop, makes sure we are talk about mechanism and not motor
-    config.Feedback.WithSensorToMechanismRatio(Swerve::Mechanism::kDriveGearRatio); //Possible it does nothing, if so, just use DriveSpeedToTurns constant
+    // config.Feedback.WithSensorToMechanismRatio(Swerve::Mechanism::kDriveGearRatio); //does nothing, just use DriveSpeedToTurns constant
     // Set the PIDF terms
     config.Slot0.WithKS(Swerve::Mechanism::kStaticVoltage.value()).WithKV(Swerve::Mechanism::kVelocityVoltage.value()).WithKP(Swerve::System::kVelocityPControl);
     // Make sure it doesn't coast
@@ -85,13 +85,11 @@ void SwerveModule::SetState(frc::SwerveModuleState desiredState)
         frc::Rotation2d(m_chassisAngularOffset);
     // Make sure we are not rotating too much
     frc::SwerveModuleState optimizedDesiredState{frc::SwerveModuleState::Optimize(
-        correctedDesiredState, frc::Rotation2d(units::radian_t{
-                                    m_turningAbsoluteEncoder.GetPosition()}))};
+        correctedDesiredState, frc::Rotation2d(units::radian_t{m_turningAbsoluteEncoder.GetPosition()}))};
 
     // Sets the velocity of the driving motors
     m_drivingTalonFx.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t(
-        optimizedDesiredState.speed.value() / Swerve::Mechanism::kWheelCircumference.value()
-        /*if doesn't work, uncomment optimizedDesiredState.speed.value() * SwerveDrive::kDriveSpeedToTurns */)}.WithSlot(0));
+        optimizedDesiredState.speed.value() * Swerve::Mechanism::kDriveSpeedToTurns)}.WithSlot(0));
     // Sets the position of the turning motors
     m_turningPIDController.SetReference(
         optimizedDesiredState.angle.Radians().value(),

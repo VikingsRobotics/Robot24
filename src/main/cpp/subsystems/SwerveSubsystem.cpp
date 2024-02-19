@@ -47,14 +47,14 @@ void SwerveSubsystem::StopModules() {
     m_backRight.Stop();
 }
 
-void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4>* states) {
+void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4> states) {
     // Make sure that we are under max speed
-    Swerve::System::kDriveKinematics.DesaturateWheelSpeeds(states,Swerve::Mechanism::kPhysicalMoveMax);
+    Swerve::System::kDriveKinematics.DesaturateWheelSpeeds(&states,Swerve::Mechanism::kPhysicalMoveMax);
     // Calls every swerve modules SetStates function
-    m_frontLeft.SetState((*states)[0]);
-    m_frontRight.SetState((*states)[1]);
-    m_backLeft.SetState((*states)[2]);
-    m_backRight.SetState((*states)[3]);
+    m_frontLeft.SetState(states[0]);
+    m_frontRight.SetState(states[1]);
+    m_backLeft.SetState(states[2]);
+    m_backRight.SetState(states[3]);
 }
 
 void SwerveSubsystem::Brake()

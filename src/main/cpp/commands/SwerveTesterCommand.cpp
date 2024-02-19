@@ -30,7 +30,7 @@ void SwerveTesterCommand::Execute()
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] speed",moduleStates.at(i).speed.value());
     }
     // Send the states to the swerve systems for the real world
-    m_subsystem->SetModulesState(&moduleStates);
+    m_subsystem->SetModulesState(moduleStates);
 }
 
 bool SwerveTesterCommand::IsFinished()

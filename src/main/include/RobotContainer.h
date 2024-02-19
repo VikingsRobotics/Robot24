@@ -7,6 +7,9 @@
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/CommandXboxController.h>
 #include <frc2/command/button/CommandJoystick.h>
+#include <frc2/command/Commands.h>
+
+#include <frc/smartdashboard/SendableChooser.h>
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"
@@ -28,7 +31,7 @@ class RobotContainer {
   */
   RobotContainer();
   //* @return CommandPtr for auto, TODO
-  std::optional<frc2::CommandPtr> GetAutonomousCommand();
+  frc2::Command* GetAutonomousCommand();
 
  private:
   //* Type safe union for driving controller
@@ -40,6 +43,14 @@ class RobotContainer {
   //TODO: GrabberSubsystem
   //*
   //TODO: ThrowerSubsystem
+
+  //* Auto routines
+  frc2::CommandPtr m_defaultAuto = frc2::cmd::None();
+  frc2::CommandPtr m_moveAuto = frc2::cmd::None();
+  frc2::CommandPtr m_throwAuto = frc2::cmd::None();
+  frc2::CommandPtr m_collectAuto = frc2::cmd::None();
+
+  frc::SendableChooser<frc2::Command*> m_chooser;
 
   //* Config button bindings to controllers for NOW
   void ConfigureBindings();

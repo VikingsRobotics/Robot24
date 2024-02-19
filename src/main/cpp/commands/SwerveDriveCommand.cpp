@@ -45,7 +45,7 @@ void SwerveDriveCommand::Execute() {
         frc::SmartDashboard::PutNumber("["+std::to_string(i)+"] angle",moduleStates.at(i).angle.Degrees().value());
     }
     // Send the states to the swerve systems for the real world
-    m_subsystem->SetModulesState(&moduleStates);
+    m_subsystem->SetModulesState(moduleStates);
 }
 
 void SwerveDriveCommand::End(bool interrupted) {

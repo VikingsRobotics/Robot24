@@ -42,7 +42,7 @@ public:
    * 
    * @param states* pointer to array of module state that are desired
   */
-  void SetModulesState(wpi::array<frc::SwerveModuleState,4>* states);
+  void SetModulesState(wpi::array<frc::SwerveModuleState,4> states);
 
   void Brake();
 private:

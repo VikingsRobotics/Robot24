@@ -50,7 +50,7 @@ class Robot : public frc::TimedRobot {
 
  private:
   //* A command that is explicitly scheduled during auto and cancelled during teleop
-  std::optional<frc2::CommandPtr> m_autonomousCommand;
+  std::optional<frc2::Command*> m_autonomousCommand;
   //* All of the robot interal storage
   RobotContainer m_container;
 };

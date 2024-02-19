@@ -8,6 +8,7 @@
 #include <units/angular_velocity.h>
 #include <units/voltage.h>
 #include <units/length.h>
+#include <units/acceleration.h>
 
 #include <frc/PneumaticsModuleType.h>
 
@@ -37,6 +38,16 @@ constexpr int kDriverControllerPort = 0;
     constexpr double kDriveDeadband = 0.05;
     //* TeleOp drivers controlling movement speed
     constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
+    //* TeleOp drivers lowest normal speed
+    constexpr units::meters_per_second_t kDriveMoveSpeedLow = 2.3_mps;
+    //* Percent that the low speed on the range max speed
+    constexpr double kPercentDriveLow = kDriveMoveSpeedLow/kDriveMoveSpeedMax;
+    //* Precision drivers lowest speed
+    constexpr units::meters_per_second_t kDrivePrecision = 0.6_mps;
+    //* Percent that the precision speed on the range max speed
+    constexpr double kPercentDrivePrecision = kDrivePrecision/kDriveMoveSpeedMax;
+    //* When the throttle axis transforms into precision control on joystick
+    constexpr double kPrecisionThrottleThreshold = -0.6;
     //* TeleOp drivers controlling angular speed
     constexpr units::radians_per_second_t kDriveAngleSpeedMax = 6.0_rad_per_s;
     } // namespace Drive
@@ -90,7 +101,7 @@ constexpr int kPneumaticId = 0;
     //* Type of control module for the pneumatics
     constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
 
-    constexpr units::turn_t kRetreatDistance{-150};
+    constexpr units::turn_t kRetreatDistance{-10};
     }
 } // namespace CanBus
 //* namespace containing all swerve module constants
@@ -138,4 +149,17 @@ namespace Swerve
     */
     extern frc::SwerveDriveKinematics<4> kDriveKinematics;
     } // namespace System
+    namespace Auto
+    {
+    
+    constexpr double kPXController = 1;
+
+    constexpr double kPYController = 1;
+
+    constexpr double kPAController = 1;
+
+    constexpr units::meters_per_second_t kMaxVelocity = 5.1_mps;
+
+    constexpr units::meters_per_second_squared_t kMaxAcceleration = 2_mps_sq;
+    }
 } // namespace Swerve
