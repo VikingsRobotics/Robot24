@@ -6,11 +6,13 @@
 
 #include <frc2/command/CommandPtr.h>
 #include <frc2/command/button/CommandXboxController.h>
+#include <frc2/command/button/CommandJoystick.h>
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"
 
 #include <optional>
+#include <variant>
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -29,9 +31,8 @@ class RobotContainer {
   std::optional<frc2::CommandPtr> GetAutonomousCommand();
 
  private:
-  //* XBox Controller connected first to the PC
-  frc2::CommandXboxController m_driverController{
-      Operator::kDriverControllerPort};
+  //* Type safe union for driving controller
+  std::variant<std::monostate,frc2::CommandXboxController,frc2::CommandJoystick> m_driverController{std::monostate{}};
 
   //* Swerve Subsystem: Controls robot movement
   SwerveSubsystem m_swerveSubsystem;

@@ -43,6 +43,8 @@ public:
    * @param states* pointer to array of module state that are desired
   */
   void SetModulesState(wpi::array<frc::SwerveModuleState,4>* states);
+
+  void Brake();
 private:
   //* Gryo used for odometry and for field centric control
   ctre::phoenix6::hardware::Pigeon2 m_gryo{Device::kGyroId,Device::kBusName};

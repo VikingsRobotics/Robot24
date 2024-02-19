@@ -9,10 +9,10 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 SwerveDriveCommand::SwerveDriveCommand(SwerveSubsystem* const subsystem,std::function<double(void)> xSpdFunc,
-    std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,
+    std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,std::function<bool(void)> brakeFunc,
     std::function<bool(void)> fieldFunc,double rateLimit) : m_subsystem{subsystem},
-m_xSpdFunc{std::move(xSpdFunc)},m_ySpdFunc{std::move(ySpdFunc)},m_aSpdFunc{std::move(aSpdFunc)},m_fieldFunc{std::move(fieldFunc)},
-m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLimit / 1_s},m_aLimiter{rateLimit / 1_s}
+m_xSpdFunc{std::move(xSpdFunc)},m_ySpdFunc{std::move(ySpdFunc)},m_aSpdFunc{std::move(aSpdFunc)},m_brakeFunc{std::move(brakeFunc)},
+m_fieldFunc{std::move(fieldFunc)},m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLimit / 1_s},m_aLimiter{rateLimit / 1_s}
 {
     // Adds to list of subsystem requirement so that only one command has access
     AddRequirements(m_subsystem);
@@ -21,6 +21,14 @@ m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLimit / 1_s},m_aLimiter{rateLimit / 1
 }
 
 void SwerveDriveCommand::Execute() {
+    // Check if we are currently braking
+    if(m_brakeFunc())
+    {
+        // Call subsystem to break, it calls set modules
+        m_subsystem->Brake();
+        // Make sure to early return, don't do extra work
+        return;
+    }
     // Calculate the speed after deadbanding the input and multiplying by teleop speed
     auto xSpeed = -m_xLimiter.Calculate(frc::ApplyDeadband(m_xSpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;
     auto ySpeed = -m_yLimiter.Calculate(frc::ApplyDeadband(m_ySpdFunc(),Operator::Drive::kDriveDeadband,1.0)) * Operator::Drive::kDriveMoveSpeedMax;

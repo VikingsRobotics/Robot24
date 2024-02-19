@@ -5,6 +5,8 @@
 #include <frc/Solenoid.h>
 #include <frc/Compressor.h>
 
+#include "Constants.h"
+
 class PneumaticSubsystem : public frc2::SubsystemBase 
 {
 public:
