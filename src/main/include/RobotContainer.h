@@ -13,6 +13,7 @@
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"
+#include "subsystems/RampSubsystem.h"
 
 #include <optional>
 #include <variant>
@@ -43,6 +44,7 @@ class RobotContainer {
   //TODO: GrabberSubsystem
   //*
   //TODO: ThrowerSubsystem
+  RampSubsystem m_rampSubsystem;
 
   //* Auto routines
   frc2::CommandPtr m_defaultAuto = frc2::cmd::None();

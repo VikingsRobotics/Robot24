@@ -9,6 +9,7 @@
 #include <units/voltage.h>
 #include <units/length.h>
 #include <units/acceleration.h>
+#include <units/angular_acceleration.h>
 
 #include <frc/PneumaticsModuleType.h>
 
@@ -18,6 +19,8 @@
 #include <rev/AbsoluteEncoder.h>
 
 #include <frc/kinematics/SwerveDriveKinematics.h>
+
+#include <frc/trajectory/TrapezoidProfile.h>
 
 /**
  * The Constants header provides a convenient place for teams to hold robot-wide
@@ -158,8 +161,14 @@ namespace Swerve
 
     constexpr double kPAController = 1;
 
-    constexpr units::meters_per_second_t kMaxVelocity = 5.1_mps;
+    constexpr units::meters_per_second_t kMaxSpeed = 5_mps;
 
     constexpr units::meters_per_second_squared_t kMaxAcceleration = 2_mps_sq;
+
+    constexpr units::radians_per_second_t kMaxAngularSpeed = 12_rad_per_s;
+
+    constexpr units::radians_per_second_squared_t kMaxAngularAcceleration = 10_rad_per_s_sq;
+
+    extern frc::TrapezoidProfile<units::radians>::Constraints kThetaControllerConstraints;
     }
 } // namespace Swerve
