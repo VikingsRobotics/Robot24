@@ -7,11 +7,13 @@
 #include <frc2/command/button/Trigger.h>
 #include <frc2/command/FunctionalCommand.h>
 #include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/trajectory/TrajectoryGenerator.h>
 
 #include <units/time.h>
 
 #include <cmath>
 
+#include <frc2/command/Commands.h>
 #include "commands/SwerveDriveCommand.h"
 #include "commands/SwerveTesterCommand.h"
 
@@ -25,7 +27,7 @@ overloaded(Ts...) -> overloaded<Ts...>;
 RobotContainer::RobotContainer() {
   // Initialize all of your commands and subsystems here
   // Swerve Subsystem defaults back to user controlled controller command
-
+  
   m_chooser.SetDefaultOption("Default Auto",m_defaultAuto.get());
   m_chooser.AddOption("Move-Only Auto",m_moveAuto.get());
   m_chooser.AddOption("Throw Auto",m_throwAuto.get());
@@ -41,6 +43,7 @@ RobotContainer::RobotContainer() {
   //Currently m_driverController is monostate
   if(type == frc::GenericHID::HIDType::kHIDJoystick) { m_driverController = frc2::CommandJoystick{Operator::kDriverControllerPort}; }
   else { m_driverController = frc2::CommandXboxController{Operator::kDriverControllerPort}; }
+
   // Visit the the current m_driverController for default command
   std::visit(overloaded{
     // Assign default command for joystick
@@ -92,5 +95,7 @@ void RobotContainer::ConfigureBindings() {
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
   // Currently returns a empty CommandPtr
+
+
   return m_chooser.GetSelected(); 
 }

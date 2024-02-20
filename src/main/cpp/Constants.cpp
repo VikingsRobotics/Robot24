@@ -10,4 +10,10 @@ namespace Swerve
             frc::Translation2d{-kWheelBase/2,+kTrackWidth/2},
             frc::Translation2d{-kWheelBase/2,-kTrackWidth/2} };
     } // namespace System
+    namespace Auto
+    {
+        frc::TrapezoidProfile<units::radians>::Constraints kThetaControllerConstraints{
+            kMaxAngularSpeed,
+            kMaxAngularAcceleration};
+    }
 } // namespace Swerve
