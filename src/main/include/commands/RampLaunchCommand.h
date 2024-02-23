@@ -1,25 +1,25 @@
-
 #pragma once
 
 #include "subsystems/RampSubsystem.h"
 
+#include <frc2/command/FunctionalCommand.h>
+#include <frc2/command/ParallelCommandGroup.h>
+#include <frc2/command/WaitCommand.h>
+#include <frc2/command/SequentialCommandGroup.h>
 #include <frc2/command/CommandHelper.h>
-#include <frc2/command/Command.h>
+#include <functional>
 
 #include <units/angular_velocity.h>
 
-class RampLaunchCommand : public frc2::CommandHelper<frc2::Command,RampLaunchCommand>
+class RampLaunchCommand : public frc2::CommandHelper<frc2::SequentialCommandGroup,RampLaunchCommand>
 {
 public:
-    RampLaunchCommand(RampSubsystem* const subsystem,units::turns_per_second_t right,units::turns_per_second_t left);
-
-    void Initialize() override;
-    void Execute() override;
-    bool IsFinished() override;
-    void End(bool interrupted) override;
+    RampLaunchCommand(RampSubsystem* const subsystem,std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc);
 private:
-    RampSubsystem* const m_subsystem;
-    uint8_t m_state;
+    frc2::FunctionalCommand GetSolenoidCommand();
+    frc2::ParallelCommandGroup MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck);
+    frc2::FunctionalCommand SetLauncherVelocityCommand(std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc);
+    RampSubsystem* const m_subsystem = nullptr;
     units::turns_per_second_t m_right;
     units::turns_per_second_t m_left;
 };

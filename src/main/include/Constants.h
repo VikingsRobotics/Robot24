@@ -10,6 +10,7 @@
 #include <units/length.h>
 #include <units/acceleration.h>
 #include <units/angular_acceleration.h>
+#include <units/time.h>
 
 #include <frc/PneumaticsModuleType.h>
 
@@ -35,6 +36,8 @@
 namespace Operator {
 //* USB Port to the first controller connected to PC
 constexpr int kDriverControllerPort = 0;
+
+constexpr int kAssistControllerPort = 1;
     namespace Drive
     {
     //* Prevents controller from running when under very low values
@@ -95,6 +98,8 @@ constexpr int kPneumaticId = 0;
     constexpr rev::CANSparkMax::MotorType kSparkMotorType = rev::CANSparkMax::MotorType::kBrushless;
     //* Default encoder type used for spark absolute encoders
     constexpr rev::SparkAbsoluteEncoder::Type kSparkAbsEncoderType = rev::SparkAbsoluteEncoder::Type::kDutyCycle;
+
+    constexpr rev::SparkRelativeEncoder::Type kSparkRelEncoderType = rev::SparkRelativeEncoder::Type::kHallSensor;
     //* Invert absolute encoder to match direction of motor movement
     constexpr bool kInvertEncoder = true;
     //* @deprecated How many encoder ticks are in one rotation
@@ -103,10 +108,17 @@ constexpr int kPneumaticId = 0;
     constexpr int KTalonResolution = 2048;
     //* Type of control module for the pneumatics
     constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
-
-    constexpr units::turn_t kRetreatDistance{-10};
     }
 } // namespace CanBus
+namespace Ramp
+{
+
+    constexpr double kLoaderSpeed{0.5};
+
+    constexpr units::second_t kRetreatTime{1};
+
+
+}
 //* namespace containing all swerve module constants
 namespace Swerve
 {
@@ -155,11 +167,9 @@ namespace Swerve
     namespace Auto
     {
     
-    constexpr double kPXController = 1;
+    constexpr double kPTranslationController = 1;
 
-    constexpr double kPYController = 1;
-
-    constexpr double kPAController = 1;
+    constexpr double kPRotationController = 1;
 
     constexpr units::meters_per_second_t kMaxSpeed = 5_mps;
 

@@ -9,18 +9,11 @@ RampGatherCommand::RampGatherCommand(RampSubsystem* const subsystem) : m_subsyst
 
 void RampGatherCommand::Initialize() 
 {
-    std::array<double,4> array{0.0,0.0,0.0,0.0};
-    m_subsystem->SetMotors(array);
-}
-
-void RampGatherCommand::Execute()
-{
-    std::array<double,4> array{0.7,0.5,0.0,0.0};
-    m_subsystem->SetMotors(array);
+    if(m_subsystem->GetSolenoid()) { m_subsystem->SetSolenoid(false); }
+    m_subsystem->Gather(0.7,0.5);
 }
 
 void RampGatherCommand::End(bool interrupted)
 {
-    std::array<double,4> array{0.0,0.0,0.0,0.0};
-    m_subsystem->SetMotors(array);
+    m_subsystem->Stop();
 }

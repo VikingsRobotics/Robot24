@@ -1,56 +1,82 @@
 #include "commands/RampLaunchCommand.h"
 
-#include <frc2/command/Commands.h>
-
 #include "Constants.h"
 
 RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem,
-    units::turns_per_second_t right,units::turns_per_second_t left) : m_subsystem{subsystem},
-    m_right{right},m_left{left}
+    std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc) : 
+    m_subsystem{subsystem}
 {
     AddRequirements(m_subsystem);
     
-    SetName("Gather Command");
+    SetName("Launch Command");
+    
+    AddCommands(
+        GetSolenoidCommand(),
+        MoveLoaderDistanceCommand(Ramp::kLoaderSpeed,Ramp::kRetreatTime,true),
+        SetLauncherVelocityCommand(rightFunc,leftFunc),
+        MoveLoaderDistanceCommand(-Ramp::kLoaderSpeed,2 * Ramp::kRetreatTime,false)
+    );
 }
 
-void RampLaunchCommand::Initialize() 
+frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand()
 {
-    std::array<double,4> array{0.0,0.0,0.0,0.0};
-    m_subsystem->SetMotors(array);
-    m_subsystem->Retreat(Device::Internal::kRetreatDistance);
-    m_state = 0;
+    return frc2::FunctionalCommand{
+        [this]() {
+            if(!m_subsystem->GetSolenoid()) { m_subsystem->SetSolenoid(true);}
+            m_subsystem->Stop();
+        },
+        [](){;},
+        [](bool interrupted){;},
+        [this](){ return m_subsystem->GetSolenoid(); }
+    };
 }
-
-void RampLaunchCommand::Execute()
+frc2::ParallelCommandGroup RampLaunchCommand::MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck)
 {
-    auto clearTps = [](units::turns_per_second_t a,units::turns_per_second_t b) { return (a-b).value() < 0.1 && (a-b).value() > -0.1; };
-    auto clear = [](units::turn_t a,units::turn_t b) { return (a-b).value() < 0.1 && (a-b).value() > -0.1; };
-
-    std::array<units::turns_per_second_t,4> varray{0_tps,0_tps,m_right,m_left};
-    if((~m_state & 0x1) && clear(Device::Internal::kRetreatDistance,m_subsystem->GetPosition()))
+    if(retreatCheck)
     {
-        m_state |= 0x1;
-        m_subsystem->SetVelocities(varray);
+        return frc2::ParallelCommandGroup{
+            frc2::FunctionalCommand{ 
+                [this,speed]() {
+                    if(!m_subsystem->retreated) { m_subsystem->Retreat(speed); }
+                },
+                [](){},
+                [](bool interrupted){},
+                [this](){ return m_subsystem->retreated; }
+            },
+            frc2::WaitCommand{time}};
     }
-    if((~m_state & 0x1)) { return; }
-    varray = m_subsystem->GetVelocities();
-    if((~m_state & 0x2) && clearTps(m_right,m_subsystem->GetVelocity(RampSubsystem::TopRight)) &&
-        clearTps(m_left,m_subsystem->GetVelocity(RampSubsystem::TopLeft)))
-    {
-        m_state |= 0x2;
-        m_subsystem->Retreat(-2 * Device::Internal::kRetreatDistance);
-    }
-    if((~m_state & 0x2)) { return; }
-    if((~m_state & 0x4) && clear(-2 * Device::Internal::kRetreatDistance,m_subsystem->GetPosition())) { m_state |= 0x4; }
+    return frc2::ParallelCommandGroup{
+        frc2::FunctionalCommand{
+            [this,speed]() {
+                m_subsystem->Retreat(speed);
+            },
+            [](){},
+            [this](bool interrupted){
+                m_subsystem->Stop();
+                m_subsystem->retreated = false;
+            },
+            [](){ return false; }
+        },
+        frc2::WaitCommand{time}};
 }
 
-bool RampLaunchCommand::IsFinished()
+frc2::FunctionalCommand RampLaunchCommand::SetLauncherVelocityCommand(
+    std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc)
 {
-    return m_state & 0x4;
-}
+    auto clear = [](double a,double b,double range) { return a-b <= range && a-b >= -range; };
 
-void RampLaunchCommand::End(bool interrupted)
-{
-    std::array<double,4> array{0.0,0.0,0.0,0.0};
-    m_subsystem->SetMotors(array);
+    return frc2::FunctionalCommand{
+        [this,rightFunc,leftFunc]() {
+            m_right = rightFunc();
+            m_left = leftFunc();
+            m_subsystem->SetLauncherVelocity(m_right.value(),m_left.value());
+        },
+        [](){},
+        [](bool interrupted){},
+        [this,clear](){
+            bool vRight = clear(m_right.value(),m_subsystem->GetLauncherVelocityRight(),0.5);
+            bool vLeft = clear(m_left.value(),m_subsystem->GetLauncherVelocityLeft(),0.5);
+            return vRight && vLeft;
+        }
+    };
 }

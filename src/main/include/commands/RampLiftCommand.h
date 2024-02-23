@@ -5,13 +5,14 @@
 #include <frc2/command/CommandHelper.h>
 #include <frc2/command/Command.h>
 
-class RampGatherCommand : public frc2::CommandHelper<frc2::Command,RampGatherCommand>
+class RampLiftCommand : public frc2::CommandHelper<frc2::Command,RampLiftCommand>
 {
 public:
-    RampGatherCommand(RampSubsystem* const subsystem);
+    RampLiftCommand(RampSubsystem* const subsystem,bool direction);
 
     void Initialize() override;
     void End(bool interrupted) override;
 private:
     RampSubsystem* const m_subsystem;
+    bool m_direction;
 };

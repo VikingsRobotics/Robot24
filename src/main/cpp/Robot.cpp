@@ -5,8 +5,13 @@
 #include "Robot.h"
 
 #include <frc2/command/CommandScheduler.h>
+#include <pathplanner/lib/pathfinding/Pathfinding.h>
+#include <pathplanner/lib/pathfinding/LocalADStar.h>
 
-void Robot::RobotInit() {}
+void Robot::RobotInit() {
+  std::unique_ptr<pathplanner::Pathfinder> pathFinder{std::make_unique<pathplanner::LocalADStar>()};
+  pathplanner::Pathfinding::setPathfinder(std::move(pathFinder));
+}
 
 void Robot::RobotPeriodic() {
   frc2::CommandScheduler::GetInstance().Run();

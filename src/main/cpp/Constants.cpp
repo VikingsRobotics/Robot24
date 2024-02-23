@@ -12,7 +12,7 @@ namespace Swerve
     } // namespace System
     namespace Auto
     {
-        frc::TrapezoidProfile<units::radians>::Constraints kThetaControllerConstraints{
+        [[maybe_unused]] frc::TrapezoidProfile<units::radians>::Constraints kThetaControllerConstraints{
             kMaxAngularSpeed,
             kMaxAngularAcceleration};
     }

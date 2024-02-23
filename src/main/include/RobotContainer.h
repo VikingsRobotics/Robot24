@@ -35,23 +35,22 @@ class RobotContainer {
   frc2::Command* GetAutonomousCommand();
 
  private:
-  //* Type safe union for driving controller
-  std::variant<std::monostate,frc2::CommandXboxController,frc2::CommandJoystick> m_driverController{std::monostate{}};
 
+  void SetSwerveDefaultCommand(frc2::CommandXboxController& control);
+  void SetSwerveDefaultCommand(frc2::CommandJoystick& control);
+
+  void GenerateSendable();
+
+  //* Type safe union for driving controller
+  std::variant<frc2::CommandXboxController,frc2::CommandJoystick> m_driverController = frc2::CommandJoystick{Operator::kDriverControllerPort};
+  frc2::CommandXboxController m_assistController = frc2::CommandXboxController(Operator::kAssistControllerPort);
   //* Swerve Subsystem: Controls robot movement
   SwerveSubsystem m_swerveSubsystem;
-  //*
-  //TODO: GrabberSubsystem
-  //*
   //TODO: ThrowerSubsystem
   RampSubsystem m_rampSubsystem;
 
   //* Auto routines
-  frc2::CommandPtr m_defaultAuto = frc2::cmd::None();
-  frc2::CommandPtr m_moveAuto = frc2::cmd::None();
-  frc2::CommandPtr m_throwAuto = frc2::cmd::None();
-  frc2::CommandPtr m_collectAuto = frc2::cmd::None();
-
+  wpi::SmallVector<frc2::CommandPtr,32> m_commands;
   frc::SendableChooser<frc2::Command*> m_chooser;
 
   //* Config button bindings to controllers for NOW

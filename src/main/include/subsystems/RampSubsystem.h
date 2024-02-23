@@ -2,7 +2,14 @@
 
 #include <frc2/command/SubsystemBase.h>
 
-#include <ctre/phoenix6/TalonFX.hpp>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <wpi/sendable/SendableBuilder.h>
+
+#include <rev/CANSparkMax.h>
+#include <rev/SparkRelativeEncoder.h>
+#include <rev/SparkPIDController.h>
+
+#include <frc/Solenoid.h>
 
 #include <units/angle.h>
 #include <units/angular_velocity.h>
@@ -12,31 +19,34 @@
 class RampSubsystem : public frc2::SubsystemBase 
 {
 public:
-    enum Key : size_t
-    {
-        Bottom = 0,
-        Loader = 1,
-        TopRight = 2,
-        TopLeft = 3
-    };
     RampSubsystem();
 
-    void SetMotor(Key key,double target);
-    void SetMotors(std::span<double,4> targets);
+    void Stop();
+    
+    void Gather(double bottom,double loader);
 
-    void Retreat(units::turn_t position);
-    units::turn_t GetPosition();
+    void SetLauncherSpeed(double right,double left);
+    void SetLauncherVelocity(double targetRight,double targetLeft);
 
-    void SetVelocity(Key key,units::turns_per_second_t target);
-    void SetVelocities(std::span<units::turns_per_second_t,4> targets);
+    double GetLauncherVelocityRight();
+    double GetLauncherVelocityLeft();
 
-    units::turns_per_second_t GetVelocity(Key key);
-    std::array<units::turns_per_second_t,4> GetVelocities();
+    void Retreat(double speed);
 
-    void InitSendable(wpi::SendableBuilder& builder);
+    bool GetSolenoid();
+    void SetSolenoid(bool on);
+
+    void InitSendable(wpi::SendableBuilder& builder) override;
+public:
+    bool retreated;
 private:
-    ctre::phoenix6::hardware::TalonFX m_bottom{Device::kBottomMotorId,Device::kBusName};
-    ctre::phoenix6::hardware::TalonFX m_loader{Device::kBottomMotorId,Device::kBusName};
-    ctre::phoenix6::hardware::TalonFX m_topRight{Device::kBottomMotorId,Device::kBusName};
-    ctre::phoenix6::hardware::TalonFX m_topLeft{Device::kBottomMotorId,Device::kBusName};
+    frc::Solenoid m_solenoid{Device::Internal::kPneumaticType,Device::kPneumaticId};
+    rev::CANSparkMax m_bottom{Device::kBottomMotorId,Device::Internal::kSparkMotorType};
+    rev::CANSparkMax m_loader{Device::kLoaderMotorId,Device::Internal::kSparkMotorType};
+    rev::CANSparkMax m_launcherRight{Device::kTopRightMotorId,Device::Internal::kSparkMotorType};
+    rev::CANSparkMax m_launcherLeft{Device::kTopLeftMotorId,Device::Internal::kSparkMotorType};
+    rev::SparkPIDController m_pidRight{m_launcherRight.GetPIDController()};
+    rev::SparkPIDController m_pidLeft{m_launcherLeft.GetPIDController()};
+    rev::SparkRelativeEncoder m_encoderRight{m_launcherRight.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
+    rev::SparkRelativeEncoder m_encoderLeft{m_launcherLeft.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
 };

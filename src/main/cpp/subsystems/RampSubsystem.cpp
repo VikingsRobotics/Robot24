@@ -1,7 +1,5 @@
 #include "subsystems/RampSubsystem.h"
 
-#include <frc/smartdashboard/SmartDashboard.h>
-
 #include <frc2/command/FunctionalCommand.h>
 
 RampSubsystem::RampSubsystem()
@@ -12,126 +10,74 @@ RampSubsystem::RampSubsystem()
 
     SetDefaultCommand(frc2::FunctionalCommand{
         [this]{
-            std::array<double,4> array{0.0,0.0,0.0,0.0};
-            SetMotors(array);
+            m_bottom.Set(0);
+            m_loader.Set(0);
+            m_launcherRight.Set(0);
+            m_launcherLeft.Set(0);
         },
         []{},[](bool){},[]{return false;},{this}});
     
     GetDefaultCommand()->SetName("Inactive Command");
     
     frc::SmartDashboard::PutData(GetDefaultCommand());
+
+    frc::SmartDashboard::PutData("Ramp Solenoid",&m_solenoid);
 }
 
-void RampSubsystem::SetMotor(Key key, double target)
+void RampSubsystem::Stop()
 {
-    switch(key)
-    {
-        case Bottom:
-            m_bottom.Set(target);
-            break;
-        case Loader:
-            m_loader.Set(target);
-            break;
-        case TopRight:
-            m_topRight.Set(target);
-            break;
-        case TopLeft:
-            m_topLeft.Set(target);
-        default:
-            break;
-    }
+    m_bottom.Set(0);
+    m_loader.Set(0);
+    m_launcherRight.Set(0);
+    m_launcherLeft.Set(0);
+}
+    
+void RampSubsystem::Gather(double bottom,double loader)
+{
+    m_bottom.Set(bottom);
+    m_loader.Set(loader);
 }
 
-void RampSubsystem::SetMotors(std::span<double,4> targets)
+void RampSubsystem::SetLauncherSpeed(double right,double left)
 {
-    m_bottom.Set(targets[0]);
-    m_loader.Set(targets[1]);
-    m_topRight.Set(targets[2]);
-    m_topLeft.Set(targets[3]);
+    m_launcherRight.Set(right);
+    m_launcherLeft.Set(left);
+}
+    
+void RampSubsystem::SetLauncherVelocity(double targetRight,double targetLeft)
+{
+    m_pidRight.SetReference(targetRight,rev::CANSparkBase::ControlType::kVelocity);
+    m_pidLeft.SetReference(targetLeft,rev::CANSparkBase::ControlType::kVelocity);
 }
 
-void RampSubsystem::Retreat(units::turn_t position)
+double RampSubsystem::GetLauncherVelocityRight()
 {
-    m_loader.SetPosition(0_tr);
-    ctre::phoenix6::controls::PositionVoltage control{position};
-    m_loader.SetControl(control);
+    return m_encoderRight.GetVelocity();
+}
+double RampSubsystem::GetLauncherVelocityLeft()
+{
+    return m_encoderLeft.GetVelocity();
 }
 
-units::turn_t RampSubsystem::GetPosition()
+void RampSubsystem::Retreat(double speed)
 {
-    return m_loader.GetPosition().GetValue();
+    m_loader.Set(speed);
 }
 
-void RampSubsystem::SetVelocity(Key key,units::turns_per_second_t target)
-{
-    ctre::phoenix6::controls::VelocityVoltage control{target};
-    switch(key)
-    {
-        case Bottom:
-            m_bottom.SetControl(control);
-            break;
-        case Loader:
-            m_loader.SetControl(control);
-            break;
-        case TopRight:
-            m_topRight.SetControl(control);
-            break;
-        case TopLeft:
-            m_topLeft.SetControl(control);
-        default:
-            break;
-    }
-}
+bool RampSubsystem::GetSolenoid() { return m_solenoid.Get(); }
 
-void RampSubsystem::SetVelocities(std::span<units::turns_per_second_t,4> targets)
-{
-    ctre::phoenix6::controls::VelocityVoltage control{0_tps};
-    m_bottom.SetControl(control.WithVelocity(targets[0]));
-    m_loader.SetControl(control.WithVelocity(targets[1]));
-    m_topRight.SetControl(control.WithVelocity(targets[2]));
-    m_topLeft.SetControl(control.WithVelocity(targets[3]));
-}
-
-units::turns_per_second_t RampSubsystem::GetVelocity(Key key)
-{
-    switch(key)
-    {
-        case Bottom:
-            return m_bottom.GetVelocity().GetValue();
-        case Loader:
-            return m_loader.GetVelocity().GetValue();
-        case TopRight:
-            return m_topRight.GetVelocity().GetValue();
-        case TopLeft:
-            return m_topLeft.GetVelocity().GetValue();
-        default:
-            return units::turns_per_second_t{std::nan("")};
-    }
-}
-
-std::array<units::turns_per_second_t,4> RampSubsystem::GetVelocities()
-{
-    std::array<units::turns_per_second_t,4> array;
-    array[0] = m_bottom.GetVelocity().GetValue();
-    array[1] = m_loader.GetVelocity().GetValue();
-    array[2] = m_topRight.GetVelocity().GetValue();
-    array[3] = m_topLeft.GetVelocity().GetValue();
-    return array;
-}
+void RampSubsystem::SetSolenoid(bool on) { m_solenoid.Set(on); }
 
 void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
 {
     SubsystemBase::InitSendable(builder);
-    builder.AddDoubleProperty("Bottom Velocity",
-        [this]{ return m_bottom.GetVelocity().GetValue().value(); },
-        [this](double value){ m_bottom.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t{value}}); });
-    builder.AddDoubleProperty("Loader Velocity",
-        [this]{ return m_loader.GetVelocity().GetValue().value(); },
-        [this](double value){ m_loader.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t{value}}); });
+    builder.AddBooleanProperty("Bottom Active",[this]{ return m_bottom.Get() != 0; },nullptr);
+    builder.AddBooleanProperty("Loader Active",[this]{ return m_loader.Get() != 0; },nullptr);
     builder.AddDoubleProperty("Top Right Velocity",
-        [this]{ return m_topRight.GetVelocity().GetValue().value(); },
-        [this](double value){ m_topRight.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t{value}}); });
+        [this]{ return m_encoderRight.GetVelocity()/60; },
+        [this](double value){ m_pidRight.SetReference(value/60,rev::CANSparkBase::ControlType::kVelocity); });
     builder.AddDoubleProperty("Top Left Velocity",
-        [this]{ return m_topLeft.GetVelocity().GetValue().value(); },
-        [this](double value){ m_topLeft.SetControl(ctre::phoenix6::controls::VelocityVoltage{units::turns_per_second_t{value}}); });
+        [this]{ return m_encoderLeft.GetVelocity()/60; },
+        [this](double value){ m_pidLeft.SetReference(value/60,rev::CANSparkBase::ControlType::kVelocity); });
+    builder.AddBooleanProperty("Retreated",[this]{ return retreated; }, [this](bool value){ retreated = value; });
 }
