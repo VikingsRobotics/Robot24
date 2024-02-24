@@ -45,10 +45,10 @@ class RobotContainer {
   std::variant<frc2::CommandXboxController,frc2::CommandJoystick> m_driverController = frc2::CommandJoystick{Operator::kDriverControllerPort};
   frc2::CommandXboxController m_assistController = frc2::CommandXboxController(Operator::kAssistControllerPort);
   //* Swerve Subsystem: Controls robot movement
-  SwerveSubsystem m_swerveSubsystem;
+  //SwerveSubsystem m_swerveSubsystem;
   //TODO: ThrowerSubsystem
   RampSubsystem m_rampSubsystem;
-  bool gathering;
+  bool m_gathering;
 
   //* Auto routines
   wpi::SmallVector<frc2::CommandPtr,32> m_commands;

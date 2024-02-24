@@ -14,11 +14,11 @@
 class RampLaunchCommand : public frc2::CommandHelper<frc2::SequentialCommandGroup,RampLaunchCommand>
 {
 public:
-    RampLaunchCommand(RampSubsystem* const subsystem,std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc);
+    RampLaunchCommand(RampSubsystem* const subsystem);
 private:
     frc2::FunctionalCommand GetSolenoidCommand();
     frc2::ParallelCommandGroup MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck);
-    frc2::FunctionalCommand SetLauncherVelocityCommand(std::function<units::revolutions_per_minute_t()> rightFunc,std::function<units::revolutions_per_minute_t()> leftFunc);
+    frc2::ParallelCommandGroup SetLauncherVelocityCommand(units::second_t time);
     RampSubsystem* const m_subsystem = nullptr;
     units::turns_per_second_t m_right;
     units::turns_per_second_t m_left;

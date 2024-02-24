@@ -20,15 +20,15 @@
 #include "commands/RampGatherCommand.h"
 #include "commands/RampLaunchCommand.h"
 #include "commands/RampLiftCommand.h"
+#include "commands/RampDropCommand.h"
 
 #include <filesystem>
 #include <frc/Filesystem.h>
 #include <pathplanner/lib/commands/PathPlannerAuto.h>
 #include <pathplanner/lib/auto/NamedCommands.h>
 
-
-
-RobotContainer::RobotContainer() {
+RobotContainer::RobotContainer() 
+{
   // Initialize all of your commands and subsystems here
   // Swerve Subsystem defaults back to user controlled controller command
   
@@ -42,7 +42,7 @@ RobotContainer::RobotContainer() {
   // Get the type of controller
   //if(std::get<frc2::CommandJoystick>(m_driverController).GetType() == frc::GenericHID::HIDType::kHIDJoystick) 
   { 
-    SetSwerveDefaultCommand(std::get<frc2::CommandJoystick>(m_driverController));
+    //SetSwerveDefaultCommand(std::get<frc2::CommandJoystick>(m_driverController));
   }
   /*else 
   { 
@@ -51,82 +51,31 @@ RobotContainer::RobotContainer() {
   }*/
 
   // Put the command onto the dashboard so it can be scheduled if something take Swerve Subsystem
-  frc::SmartDashboard::PutData("Drive Command", m_swerveSubsystem.GetDefaultCommand());
+  //frc::SmartDashboard::PutData("Drive Command", m_swerveSubsystem.GetDefaultCommand());
   
   //ConfigureBindings();
+  m_assistController.A().OnTrue(RampGatherCommand(&m_rampSubsystem).ToPtr());
+  m_assistController.B().OnTrue(frc2::InstantCommand{[]{},{&m_rampSubsystem}}.ToPtr());
+
+  frc2::CommandPtr liftUpCommand = RampLiftCommand(&m_rampSubsystem).ToPtr();
+  frc::SmartDashboard::PutData("Ramp Lift", liftUpCommand.get());
+  m_assistController.RightBumper().Debounce(Operator::Assist::kDebouncePeriodLift).OnTrue(std::move(liftUpCommand));
+
+  frc2::CommandPtr liftDownCommand = RampDropCommand(&m_rampSubsystem).ToPtr();
+  frc::SmartDashboard::PutData("Ramp Down",liftDownCommand.get());
+  m_assistController.LeftBumper().Debounce(Operator::Assist::kDebouncePeriodLift).OnTrue(std::move(liftDownCommand));
 }
 
 void RobotContainer::ConfigureBindings() {
   frc::SmartDashboard::PutData("Ramp Default", m_rampSubsystem.GetDefaultCommand());
   
   frc2::CommandPtr gatherCommand = frc2::ConditionalCommand(RampGatherCommand(&m_rampSubsystem),frc2::InstantCommand{[]{},{&m_rampSubsystem}},
-    [this]{ return gathering = !gathering; }).ToPtr();
-  frc::SmartDashboard::PutData("Ramp Gather",gatherCommand.get());
+    [this]{ return m_gathering = !m_gathering; }).ToPtr();
+  frc::SmartDashboard::PutData("Ramp Gather", gatherCommand.get());
   m_assistController.A().OnTrue(std::move(gatherCommand));
 
-  frc2::CommandPtr liftUpCommand = RampLiftCommand(&m_rampSubsystem,true).ToPtr();
-  frc::SmartDashboard::PutData("Ramp Lift Up",liftUpCommand.get());
-  m_assistController.RightBumper().Debounce(Operator::Assist::kDebouncePeriodLift).OnTrue(std::move(liftUpCommand));
-
-  frc2::CommandPtr liftDownCommand = RampLiftCommand(&m_rampSubsystem,false).ToPtr();
-  frc::SmartDashboard::PutData("Ramp Lift Down",liftDownCommand.get());
-  m_assistController.LeftBumper().Debounce(Operator::Assist::kDebouncePeriodLift).OnTrue(std::move(liftDownCommand));
-
-  frc2::CommandPtr launchCommand = RampLaunchCommand(&m_rampSubsystem,
-  [this]{
-    frc::EventLoop* button = frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop();
-    // default Velocity
-    m_assistController.GetPOV();
-    if(m_assistController.POVCenter(button).GetAsBoolean())
-    { return 600_rpm; }
-    // high Velocity
-    if(m_assistController.POVUpLeft(button).GetAsBoolean())
-    { return 850_rpm; }
-    // highest Velocity
-    if(m_assistController.POVLeft(button).GetAsBoolean())
-    { return 1000_rpm; }
-    // low Velocity
-    if(m_assistController.POVUpRight(button).GetAsBoolean())
-    { return 450_rpm; }
-    // lowest Velocity
-    if(m_assistController.POVRight(button).GetAsBoolean())
-    { return 300_rpm; }
-    // high Velocity
-    if(m_assistController.POVUp(button).GetAsBoolean())
-    { return 850_rpm; }
-    if(m_assistController.POVDown(button).GetAsBoolean())
-    { return 450_rpm; }
-    // no velocity
-    return 0_rpm;
-  },
-  [this]{
-    frc::EventLoop* button = frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop();
-    // default Velocity
-    if(m_assistController.POVCenter(button).GetAsBoolean())
-    { return 600_rpm; }
-    // low Velocity
-    if(m_assistController.POVUpLeft(button).GetAsBoolean())
-    { return 450_rpm; }
-    // lowest Velocity
-    if(m_assistController.POVLeft(button).GetAsBoolean())
-    { return 300_rpm; }
-    // high Velocity
-    if(m_assistController.POVUpRight(button).GetAsBoolean())
-    { return 850_rpm; }
-    // highest Velocity
-    if(m_assistController.POVRight(button).GetAsBoolean())
-    { return 1000_rpm; }
-    // high Velocity
-    if(m_assistController.POVUp(button).GetAsBoolean())
-    { return 850_rpm; }
-    // low Velocity
-    if(m_assistController.POVDown(button).GetAsBoolean())
-    { return 450_rpm; }
-    // no velocity
-    return 0_rpm;
-  }).ToPtr();
-  frc::SmartDashboard::PutData("Ramp Launch",launchCommand.get());
-  m_assistController.B().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchCommand));
+  
+  // m_assistController.B().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchCommand));
 }
 
 frc2::Command* RobotContainer::GetAutonomousCommand() {
@@ -136,7 +85,7 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
 void RobotContainer::SetSwerveDefaultCommand(frc2::CommandXboxController& control)
 {
-  m_swerveSubsystem.SetDefaultCommand(SwerveDriveCommand(&m_swerveSubsystem,
+  /*m_swerveSubsystem.SetDefaultCommand(SwerveDriveCommand(&m_swerveSubsystem,
     [&]{return control.RightBumper().Get() ? 
       Operator::Drive::kPercentDrivePrecision * control.GetRightY() :
       std::lerp(Operator::Drive::kPercentDriveLow,1,control.GetRightTriggerAxis()) * control.GetRightY();},
@@ -148,15 +97,16 @@ void RobotContainer::SetSwerveDefaultCommand(frc2::CommandXboxController& contro
       std::lerp(Operator::Drive::kPercentDriveLow,1,control.GetRightTriggerAxis()) * control.GetLeftX();}, 
     [&]{return control.X().Get();},
     [&]{return control.GetLeftTriggerAxis() < 0.7;}));
-  /*frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()->Bind([&]{ frc::SmartDashboard::PutNumber("Driver Speed",
+  frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()->Bind([&]{ frc::SmartDashboard::PutNumber("Driver Speed",
     control.RightBumper().Get() ? 
       Operator::Drive::kPercentDrivePrecision : 
-      std::lerp(Operator::Drive::kPercentDriveLow,1,control.GetRightTriggerAxis()));});*/
+      std::lerp(Operator::Drive::kPercentDriveLow,1,control.GetRightTriggerAxis()));});
+      */
 }
 
 void RobotContainer::SetSwerveDefaultCommand(frc2::CommandJoystick& control)
 {
-  m_swerveSubsystem.SetDefaultCommand(SwerveDriveCommand(&m_swerveSubsystem,
+  /*m_swerveSubsystem.SetDefaultCommand(SwerveDriveCommand(&m_swerveSubsystem,
     [&]{return -control.GetThrottle() < Operator::Drive::kPrecisionThrottleThreshold ? 
       Operator::Drive::kPercentDrivePrecision * control.GetY() : 
       std::lerp(Operator::Drive::kPercentDriveLow,1,(-control.GetThrottle() - Operator::Drive::kPrecisionThrottleThreshold) / (1 - Operator::Drive::kPrecisionThrottleThreshold)) * control.GetY();},
@@ -168,7 +118,7 @@ void RobotContainer::SetSwerveDefaultCommand(frc2::CommandJoystick& control)
       std::lerp(Operator::Drive::kPercentDriveLow,1,(-control.GetThrottle() - Operator::Drive::kPrecisionThrottleThreshold) / (1 - Operator::Drive::kPrecisionThrottleThreshold)) * control.GetTwist();},
     [&]{return control.GetRawButton(2);},
     [&]{return !control.GetRawButton(1);}));
-    /*frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()->Bind([&]{ frc::SmartDashboard::PutNumber("Driver Speed",
+    frc2::CommandScheduler::GetInstance().GetDefaultButtonLoop()->Bind([&]{ frc::SmartDashboard::PutNumber("Driver Speed",
       -control.GetThrottle() < Operator::Drive::kPrecisionThrottleThreshold ? 
         Operator::Drive::kPercentDrivePrecision : 
         std::lerp(Operator::Drive::kPercentDriveLow,1,(-control.GetThrottle() - Operator::Drive::kPrecisionThrottleThreshold) / (1 - Operator::Drive::kPrecisionThrottleThreshold)));});*/

@@ -1,6 +1,7 @@
 #include "subsystems/RampSubsystem.h"
 
 #include <frc2/command/FunctionalCommand.h>
+#include <frc2/command/RunCommand.h>
 
 RampSubsystem::RampSubsystem()
 {
@@ -8,91 +9,89 @@ RampSubsystem::RampSubsystem()
 
     frc::SmartDashboard::PutData(this);
 
-    SetDefaultCommand(frc2::FunctionalCommand{
+    SetDefaultCommand(frc2::RunCommand{
         [this]{
-            m_bottom.Set(0);
-            m_loader.Set(0);
-            m_launcherRight.Set(0);
-            m_launcherLeft.Set(0);
-        },
-        []{},[](bool){},[]{return false;},{this}});
+            m_sweeperMotor.Set(0);
+            m_feederMotor.Set(0);
+            m_launcherRightMotor.Set(0);
+            m_launcherLeftMotor.Set(0);
+        }, {this}});
     
     GetDefaultCommand()->SetName("Inactive Command");
     
     frc::SmartDashboard::PutData(GetDefaultCommand());
-
-    frc::SmartDashboard::PutData("Ramp Solenoid",&m_solenoid);
-
-    m_pidLeft.SetP(0.5);
-    m_pidLeft.SetI(0);
-    m_pidLeft.SetD(0);
-    m_pidLeft.SetFF(1/5676);
-
-    m_pidRight.SetP(0.5);
-    m_pidRight.SetI(0);
-    m_pidRight.SetD(0);
-    m_pidRight.SetFF(1/5676);
+    frc::SmartDashboard::PutData("Ramp Solenoid", &m_solenoid);
 }
 
 void RampSubsystem::Stop()
 {
-    m_bottom.Set(0);
-    m_loader.Set(0);
-    m_launcherRight.Set(0);
-    m_launcherLeft.Set(0);
-}
-    
-void RampSubsystem::Gather(double bottom,double loader)
-{
-    m_bottom.Set(bottom);
-    m_loader.Set(loader);
+    m_sweeperMotor.Set(0);
+    m_feederMotor.Set(0);
+    m_launcherRightMotor.Set(0);
+    m_launcherLeftMotor.Set(0);
 }
 
-void RampSubsystem::SetLauncherSpeed(double right,double left)
+void RampSubsystem::Gather()
 {
-    m_launcherRight.Set(right);
-    m_launcherLeft.Set(left);
-}
-    
-void RampSubsystem::SetLauncherVelocity(double targetRight,double targetLeft)
-{
-    m_pidRight.SetReference(targetRight,rev::CANSparkBase::ControlType::kVelocity);
-    m_pidLeft.SetReference(targetLeft,rev::CANSparkBase::ControlType::kVelocity);
+    m_sweeperMotor.Set(.5);
+    m_feederMotor.Set(.7);
 }
 
-double RampSubsystem::GetLauncherVelocityRight()
+void RampSubsystem::Eject()
 {
-    return m_encoderRight.GetVelocity();
-}
-double RampSubsystem::GetLauncherVelocityLeft()
-{
-    return m_encoderLeft.GetVelocity();
+    m_sweeperMotor.Set(-.7);
+    m_feederMotor.Set(-.5);
 }
 
-void RampSubsystem::Retreat(double speed)
+void RampSubsystem::SpoolUpLaunchers()
 {
-    m_loader.Set(speed);
+    m_launcherLeftMotor.Set(1);
+    m_launcherRightMotor.Set(1);
 }
 
-bool RampSubsystem::GetSolenoid() { return m_solenoid.Get() == frc::DoubleSolenoid::Value::kReverse; }
+/// @brief This backs the note down so that it's not engaged with the launchers
+void RampSubsystem::StageNoteForLaunch()
+{
+    m_sweeperMotor.Set(0);
+    m_feederMotor.Set(-.3);
+}
 
-void RampSubsystem::SetSolenoid(bool on) { 
-    if(on)
-    { m_solenoid.Set(frc::DoubleSolenoid::Value::kForward); } 
-    else
-    { m_solenoid.Set(frc::DoubleSolenoid::Value::kReverse); }
+/// @brief This pushes the note into the launchers. This is what actually sends the note flying.
+void RampSubsystem::Fire()
+{
+    m_feederMotor.Set(.4);
+}
+
+bool RampSubsystem::IsRampDown() 
+{ 
+    return m_solenoid.Get() == frc::DoubleSolenoid::Value::kReverse; 
+}
+
+bool RampSubsystem::IsRampUp()
+{
+    return m_solenoid.Get() == frc::DoubleSolenoid::Value::kForward; 
+}
+
+void RampSubsystem::SetRampDown()
+{
+    m_solenoid.Set(frc::DoubleSolenoid::Value::kReverse); 
+}
+
+void RampSubsystem::SetRampUp()
+{
+    m_solenoid.Set(frc::DoubleSolenoid::Value::kForward);
 }
 
 void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
 {
     SubsystemBase::InitSendable(builder);
-    builder.AddBooleanProperty("Bottom Active",[this]{ return m_bottom.Get() != 0; },nullptr);
-    builder.AddBooleanProperty("Loader Active",[this]{ return m_loader.Get() != 0; },nullptr);
-    builder.AddDoubleProperty("Top Right Velocity",
-        [this]{ return m_encoderRight.GetVelocity()/60; },
-        [this](double value){ m_pidRight.SetReference(value/60,rev::CANSparkBase::ControlType::kVelocity); });
-    builder.AddDoubleProperty("Top Left Velocity",
-        [this]{ return m_encoderLeft.GetVelocity()/60; },
-        [this](double value){ m_pidLeft.SetReference(value/60,rev::CANSparkBase::ControlType::kVelocity); });
-    builder.AddBooleanProperty("Retreated",[this]{ return retreated; }, [this](bool value){ retreated = value; });
+    builder.AddBooleanProperty("Sweeper Motor Active", [this]{ return m_sweeperMotor.Get() != 0; }, nullptr);
+    builder.AddBooleanProperty("Feeder Motor Active", [this]{ return m_feederMotor.Get() != 0; }, nullptr);
+    builder.AddDoubleProperty("Launcher Right Velocity",
+        [this]{ return m_launcherRightMotor.Get(); },
+        [this](double value){ m_launcherRightMotor.Set(value); });
+    builder.AddDoubleProperty("Launcher Left Velocity",
+        [this]{ return m_launcherLeftMotor.Get(); },
+        [this](double value){ m_launcherLeftMotor.Set(value); });
+    builder.AddBooleanProperty("Retreated", [this]{ return retreated; }, [this](bool value){ retreated = value; });
 }

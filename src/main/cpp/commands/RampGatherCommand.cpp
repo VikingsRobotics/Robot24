@@ -9,8 +9,12 @@ RampGatherCommand::RampGatherCommand(RampSubsystem* const subsystem) : m_subsyst
 
 void RampGatherCommand::Initialize() 
 {
-    if(m_subsystem->GetSolenoid()) { m_subsystem->SetSolenoid(false); }
-    m_subsystem->Gather(0.7,0.5);
+    if (!m_subsystem->IsRampDown()) 
+    { 
+        m_subsystem->SetRampDown(); 
+    }
+
+    m_subsystem->Gather();
 }
 
 void RampGatherCommand::End(bool interrupted)

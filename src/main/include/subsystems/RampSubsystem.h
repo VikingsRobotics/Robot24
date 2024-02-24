@@ -10,6 +10,7 @@
 #include <rev/SparkPIDController.h>
 
 #include <frc/DoubleSolenoid.h>
+#include <frc/motorcontrol/VictorSP.h>
 
 #include <units/angle.h>
 #include <units/angular_velocity.h>
@@ -22,32 +23,26 @@ public:
     RampSubsystem();
 
     void Stop();
-    
-    void Gather(double bottom,double loader);
+    void Gather();
+    void Eject();
 
-    void SetLauncherSpeed(double right,double left);
-    void SetLauncherVelocity(double targetRight,double targetLeft);
+    void SetRampDown();
+    void SetRampUp();
 
-    double GetLauncherVelocityRight();
-    double GetLauncherVelocityLeft();
+    bool IsRampDown();
+    bool IsRampUp();
 
-    void Retreat(double speed);
-
-    bool GetSolenoid();
-    void SetSolenoid(bool on);
+    void SpoolUpLaunchers();
+    void Fire();
+    void StageNoteForLaunch();
 
     void InitSendable(wpi::SendableBuilder& builder) override;
-public:
+
     bool retreated;
 private:
-    frc::DoubleSolenoid m_solenoid{Device::kPneumaticHubId,Device::Internal::kPneumaticType,Device::kPneumaticBackwardId,Device::kPneumaticForwardId};
-    rev::CANSparkMax m_bottom{Device::kBottomMotorId,rev::CANSparkMax::MotorType::kBrushed};
-    rev::CANSparkMax m_loader{Device::kLoaderMotorId,rev::CANSparkMax::MotorType::kBrushed};
-    rev::CANSparkMax m_launcherRight{Device::kTopRightMotorId,Device::Internal::kSparkMotorType};
-    rev::CANSparkMax m_launcherLeft{Device::kTopLeftMotorId,Device::Internal::kSparkMotorType};
-    rev::SparkPIDController m_pidRight{m_launcherRight.GetPIDController()};
-    rev::SparkPIDController m_pidLeft{m_launcherLeft.GetPIDController()};
-    rev::SparkRelativeEncoder m_encoderRight{m_launcherRight.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
-    rev::SparkRelativeEncoder m_encoderLeft{m_launcherLeft.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
-    
+    frc::DoubleSolenoid m_solenoid{Device::Internal::kPneumaticType, Device::kPneumaticBackwardId, Device::kPneumaticForwardId};
+    frc::VictorSP m_sweeperMotor{Device::kSweeperMotorId};
+    frc::VictorSP m_feederMotor{Device::kFeederMotorId};
+    frc::VictorSP m_launcherRightMotor{Device::kTopRightMotorId};
+    frc::VictorSP m_launcherLeftMotor{Device::kTopLeftMotorId};
 };

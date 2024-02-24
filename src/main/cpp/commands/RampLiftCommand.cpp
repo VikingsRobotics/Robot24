@@ -1,6 +1,6 @@
 #include "commands/RampLiftCommand.h"
 
-RampLiftCommand::RampLiftCommand(RampSubsystem* const subsystem,bool direction) : m_subsystem{subsystem}, m_direction{direction}
+RampLiftCommand::RampLiftCommand(RampSubsystem* const subsystem) : m_subsystem{subsystem}
 {
     AddRequirements(m_subsystem);
 
@@ -9,10 +9,10 @@ RampLiftCommand::RampLiftCommand(RampSubsystem* const subsystem,bool direction) 
 
 void RampLiftCommand::Initialize()
 {
-    if(!m_direction) { m_subsystem->SetSolenoid(m_direction); }
+    m_subsystem->SetRampUp();
 }
 
 bool RampLiftCommand::IsFinished()
 {
-    return m_subsystem->GetSolenoid();
+    return m_subsystem->IsRampUp();
 }

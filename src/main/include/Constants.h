@@ -88,19 +88,17 @@ constexpr int kBRDriveMotorId = 8;
 //* (CANBUS) ID for the Back Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
 
-constexpr int kBottomMotorId = 11;
+constexpr int kSweeperMotorId = 1;
 
-constexpr int kLoaderMotorId = 12;
+constexpr int kFeederMotorId = 0;
 
-constexpr int kTopRightMotorId = 14;
+constexpr int kTopRightMotorId = 2;
 
-constexpr int kTopLeftMotorId = 13;
+constexpr int kTopLeftMotorId = 3;
 
 constexpr int kPneumaticForwardId = 0;
 
 constexpr int kPneumaticBackwardId = 1;
-
-constexpr int kPneumaticHubId = 20;
     //* subnamespace for internal device info
     namespace Internal
     {
@@ -117,7 +115,7 @@ constexpr int kPneumaticHubId = 20;
     //* @deprecated How many encoder ticks are in one rotation
     constexpr int KTalonResolution = 2048;
     //* Type of control module for the pneumatics
-    constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
+    constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::CTREPCM;
     }
 } // namespace CanBus
 namespace Ramp
@@ -126,6 +124,8 @@ namespace Ramp
     constexpr double kLoaderSpeed{0.5};
 
     constexpr units::second_t kRetreatTime{1};
+
+    constexpr units::second_t kVelocityTime{1};
 
 
 }
