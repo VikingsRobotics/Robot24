@@ -12,7 +12,7 @@ void RampLiftCommand::Initialize()
     if(!m_direction) { m_subsystem->SetSolenoid(m_direction); }
 }
 
-void RampLiftCommand::End(bool interrupted)
+bool RampLiftCommand::IsFinished()
 {
     return m_subsystem->GetSolenoid();
 }

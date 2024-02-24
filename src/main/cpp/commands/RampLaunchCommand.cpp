@@ -1,5 +1,7 @@
 #include "commands/RampLaunchCommand.h"
 
+#include <frc2/command/InstantCommand.h>
+
 #include "Constants.h"
 
 RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem,
@@ -27,7 +29,7 @@ frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand()
         },
         [](){;},
         [](bool interrupted){;},
-        [this](){ return m_subsystem->GetSolenoid(); }
+        [this]()->bool{ return m_subsystem->GetSolenoid(); }
     };
 }
 frc2::ParallelCommandGroup RampLaunchCommand::MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck)
@@ -43,7 +45,7 @@ frc2::ParallelCommandGroup RampLaunchCommand::MoveLoaderDistanceCommand(double s
                 [](bool interrupted){},
                 [this](){ return m_subsystem->retreated; }
             },
-            frc2::WaitCommand{time}};
+            frc2::SequentialCommandGroup{frc2::WaitCommand{time},frc2::InstantCommand([this](){ m_subsystem->retreated = true; })}};
     }
     return frc2::ParallelCommandGroup{
         frc2::FunctionalCommand{

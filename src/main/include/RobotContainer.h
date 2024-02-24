@@ -48,6 +48,7 @@ class RobotContainer {
   SwerveSubsystem m_swerveSubsystem;
   //TODO: ThrowerSubsystem
   RampSubsystem m_rampSubsystem;
+  bool gathering;
 
   //* Auto routines
   wpi::SmallVector<frc2::CommandPtr,32> m_commands;

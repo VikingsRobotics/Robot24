@@ -22,7 +22,7 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
     // Set our own name
     SetName("Swerve Drive Subsystem");
     // Publishes it to the dashboard
-    frc::SmartDashboard::PutData("Driver",this);
+    frc::SmartDashboard::PutData(this);
 
     pathplanner::AutoBuilder::configureHolonomic(
         [this]{return GetPose2d();},

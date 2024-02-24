@@ -11,7 +11,7 @@ public:
     RampLiftCommand(RampSubsystem* const subsystem,bool direction);
 
     void Initialize() override;
-    void End(bool interrupted) override;
+    bool IsFinished() override;
 private:
     RampSubsystem* const m_subsystem;
     bool m_direction;

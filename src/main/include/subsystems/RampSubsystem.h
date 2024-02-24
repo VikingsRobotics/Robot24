@@ -9,7 +9,7 @@
 #include <rev/SparkRelativeEncoder.h>
 #include <rev/SparkPIDController.h>
 
-#include <frc/Solenoid.h>
+#include <frc/DoubleSolenoid.h>
 
 #include <units/angle.h>
 #include <units/angular_velocity.h>
@@ -40,13 +40,14 @@ public:
 public:
     bool retreated;
 private:
-    frc::Solenoid m_solenoid{Device::Internal::kPneumaticType,Device::kPneumaticId};
-    rev::CANSparkMax m_bottom{Device::kBottomMotorId,Device::Internal::kSparkMotorType};
-    rev::CANSparkMax m_loader{Device::kLoaderMotorId,Device::Internal::kSparkMotorType};
+    frc::DoubleSolenoid m_solenoid{Device::kPneumaticHubId,Device::Internal::kPneumaticType,Device::kPneumaticBackwardId,Device::kPneumaticForwardId};
+    rev::CANSparkMax m_bottom{Device::kBottomMotorId,rev::CANSparkMax::MotorType::kBrushed};
+    rev::CANSparkMax m_loader{Device::kLoaderMotorId,rev::CANSparkMax::MotorType::kBrushed};
     rev::CANSparkMax m_launcherRight{Device::kTopRightMotorId,Device::Internal::kSparkMotorType};
     rev::CANSparkMax m_launcherLeft{Device::kTopLeftMotorId,Device::Internal::kSparkMotorType};
     rev::SparkPIDController m_pidRight{m_launcherRight.GetPIDController()};
     rev::SparkPIDController m_pidLeft{m_launcherLeft.GetPIDController()};
     rev::SparkRelativeEncoder m_encoderRight{m_launcherRight.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
     rev::SparkRelativeEncoder m_encoderLeft{m_launcherLeft.GetEncoder(Device::Internal::kSparkRelEncoderType,Device::Internal::kSparkResolution)};
+    
 };

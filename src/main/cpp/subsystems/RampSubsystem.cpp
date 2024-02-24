@@ -22,6 +22,16 @@ RampSubsystem::RampSubsystem()
     frc::SmartDashboard::PutData(GetDefaultCommand());
 
     frc::SmartDashboard::PutData("Ramp Solenoid",&m_solenoid);
+
+    m_pidLeft.SetP(0.5);
+    m_pidLeft.SetI(0);
+    m_pidLeft.SetD(0);
+    m_pidLeft.SetFF(1/5676);
+
+    m_pidRight.SetP(0.5);
+    m_pidRight.SetI(0);
+    m_pidRight.SetD(0);
+    m_pidRight.SetFF(1/5676);
 }
 
 void RampSubsystem::Stop()
@@ -64,9 +74,14 @@ void RampSubsystem::Retreat(double speed)
     m_loader.Set(speed);
 }
 
-bool RampSubsystem::GetSolenoid() { return m_solenoid.Get(); }
+bool RampSubsystem::GetSolenoid() { return m_solenoid.Get() == frc::DoubleSolenoid::Value::kReverse; }
 
-void RampSubsystem::SetSolenoid(bool on) { m_solenoid.Set(on); }
+void RampSubsystem::SetSolenoid(bool on) { 
+    if(on)
+    { m_solenoid.Set(frc::DoubleSolenoid::Value::kForward); } 
+    else
+    { m_solenoid.Set(frc::DoubleSolenoid::Value::kReverse); }
+}
 
 void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
 {

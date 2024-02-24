@@ -43,9 +43,9 @@ constexpr int kAssistControllerPort = 1;
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
     //* TeleOp drivers controlling movement speed
-    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
+    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
     //* TeleOp drivers lowest normal speed
-    constexpr units::meters_per_second_t kDriveMoveSpeedLow = 2.3_mps;
+    constexpr units::meters_per_second_t kDriveMoveSpeedLow = 1.5_mps;
     //* Percent that the low speed on the range max speed
     constexpr double kPercentDriveLow = kDriveMoveSpeedLow/kDriveMoveSpeedMax;
     //* Precision drivers lowest speed
@@ -55,8 +55,14 @@ constexpr int kAssistControllerPort = 1;
     //* When the throttle axis transforms into precision control on joystick
     constexpr double kPrecisionThrottleThreshold = -0.6;
     //* TeleOp drivers controlling angular speed
-    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 6.0_rad_per_s;
+    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 3.0_rad_per_s;
     } // namespace Drive
+    namespace Assist
+    {
+        constexpr units::second_t kDebouncePeriodLift = 1_s;
+
+        constexpr units::second_t kDebouncePeriodLaunch = 1_s;
+    } // namespace Assist
 }  // namespace OperatorConstants
 //* namespace for device IDs
 namespace Device
@@ -82,15 +88,19 @@ constexpr int kBRDriveMotorId = 8;
 //* (CANBUS) ID for the Back Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
 
-constexpr int kBottomMotorId = 0;
+constexpr int kBottomMotorId = 11;
 
-constexpr int kLoaderMotorId = 0;
+constexpr int kLoaderMotorId = 12;
 
-constexpr int kTopRightMotorId = 0;
+constexpr int kTopRightMotorId = 14;
 
-constexpr int kTopLeftMotorId = 0;
-//* (CANBUS) ID for Pneumatics Solenoid (REV PH)
-constexpr int kPneumaticId = 0;
+constexpr int kTopLeftMotorId = 13;
+
+constexpr int kPneumaticForwardId = 0;
+
+constexpr int kPneumaticBackwardId = 1;
+
+constexpr int kPneumaticHubId = 20;
     //* subnamespace for internal device info
     namespace Internal
     {
@@ -173,12 +183,10 @@ namespace Swerve
 
     constexpr units::meters_per_second_t kMaxSpeed = 5_mps;
 
-    constexpr units::meters_per_second_squared_t kMaxAcceleration = 2_mps_sq;
+    constexpr units::meters_per_second_squared_t kMaxAcceleration = 3_mps_sq;
 
-    constexpr units::radians_per_second_t kMaxAngularSpeed = 12_rad_per_s;
+    constexpr units::radians_per_second_t kMaxAngularSpeed = 540_deg_per_s;
 
-    constexpr units::radians_per_second_squared_t kMaxAngularAcceleration = 10_rad_per_s_sq;
-
-    extern frc::TrapezoidProfile<units::radians>::Constraints kThetaControllerConstraints;
+    constexpr units::radians_per_second_squared_t kMaxAngularAcceleration = 720_deg_per_s_sq;
     }
 } // namespace Swerve
