@@ -33,6 +33,15 @@
  * they are needed.
  */
 
+#pragma Debug 
+
+#define REMOVE_SWERVE 1
+//#define REMOVE_RAMP 1
+#define REMOVE_SOLENOID 1
+#define REMOVE_AUTO 1
+
+#pragma endDebug
+
 namespace Operator {
 //* USB Port to the first controller connected to PC
 constexpr int kDriverControllerPort = 0;

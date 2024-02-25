@@ -25,22 +25,24 @@ public:
     void Stop();
     void Gather();
     void Eject();
-
+#ifndef REMOVE_SOLENOID
     void SetRampDown();
     void SetRampUp();
 
     bool IsRampDown();
     bool IsRampUp();
-
+#endif
     void SpoolUpLaunchers();
     void Fire();
     void StageNoteForLaunch();
 
     void InitSendable(wpi::SendableBuilder& builder) override;
 
-    bool retreated;
+    bool retreated = true;
 private:
+#ifndef REMOVE_SOLENOID
     frc::DoubleSolenoid m_solenoid{Device::Internal::kPneumaticType, Device::kPneumaticBackwardId, Device::kPneumaticForwardId};
+#endif
     frc::VictorSP m_sweeperMotor{Device::kSweeperMotorId};
     frc::VictorSP m_feederMotor{Device::kFeederMotorId};
     frc::VictorSP m_launcherRightMotor{Device::kTopRightMotorId};

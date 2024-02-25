@@ -12,13 +12,15 @@ RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem) :
     SetName("Launch Command");
     
     AddCommands(
+#ifndef REMOVE_SOLENOID
         GetSolenoidCommand(),
+#endif
         MoveLoaderDistanceCommand(Ramp::kLoaderSpeed, Ramp::kRetreatTime,true),
         SetLauncherVelocityCommand(Ramp::kVelocityTime),
         MoveLoaderDistanceCommand(-Ramp::kLoaderSpeed, 2 * Ramp::kRetreatTime,false)
     );
 }
-
+#ifndef REMOVE_SOLENOID
 frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand()
 {
     return frc2::FunctionalCommand{
@@ -31,6 +33,7 @@ frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand()
         [this]()->bool{ return m_subsystem->IsRampUp(); }
     };
 }
+#endif
 frc2::ParallelCommandGroup RampLaunchCommand::MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck)
 {
     if(retreatCheck)

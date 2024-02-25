@@ -9,11 +9,12 @@ RampGatherCommand::RampGatherCommand(RampSubsystem* const subsystem) : m_subsyst
 
 void RampGatherCommand::Initialize() 
 {
+#ifndef REMOVE_SOLENOID
     if (!m_subsystem->IsRampDown()) 
     { 
         m_subsystem->SetRampDown(); 
     }
-
+#endif
     m_subsystem->Gather();
 }
 

@@ -16,7 +16,9 @@ class RampLaunchCommand : public frc2::CommandHelper<frc2::SequentialCommandGrou
 public:
     RampLaunchCommand(RampSubsystem* const subsystem);
 private:
+#ifndef REMOVE_SOLENOID
     frc2::FunctionalCommand GetSolenoidCommand();
+#endif
     frc2::ParallelCommandGroup MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck);
     frc2::ParallelCommandGroup SetLauncherVelocityCommand(units::second_t time);
     RampSubsystem* const m_subsystem = nullptr;

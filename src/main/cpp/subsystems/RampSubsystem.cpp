@@ -7,7 +7,6 @@ RampSubsystem::RampSubsystem()
 {
     SetName("Ramp Subsystem");
 
-    frc::SmartDashboard::PutData(this);
 
     SetDefaultCommand(frc2::RunCommand{
         [this]{
@@ -18,8 +17,9 @@ RampSubsystem::RampSubsystem()
         }, {this}});
     
     GetDefaultCommand()->SetName("Inactive Command");
-    
     frc::SmartDashboard::PutData(GetDefaultCommand());
+    frc::SmartDashboard::PutData(this);
+    
     frc::SmartDashboard::PutData("Ramp Solenoid", &m_solenoid);
 }
 
