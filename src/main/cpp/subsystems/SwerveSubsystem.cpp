@@ -21,8 +21,6 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
     m_gryo.Reset(); 
     // Set our own name
     SetName("Swerve Drive Subsystem");
-    // Publishes it to the dashboard
-    frc::SmartDashboard::PutData(this);
 
     pathplanner::AutoBuilder::configureHolonomic(
         [this]{return GetPose2d();},
@@ -51,6 +49,7 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
     });
 
     frc::SmartDashboard::PutData("Field", &m_field);
+    frc::SmartDashboard::PutData(this);
 }
 
 void SwerveSubsystem::Periodic() { 

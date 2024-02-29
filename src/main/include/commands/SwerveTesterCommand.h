@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Constants.h"
+#ifndef REMOVE_SWERVE
 #include "subsystems/SwerveSubsystem.h"
 
 #include <frc2/command/CommandHelper.h>
@@ -52,3 +53,4 @@ private:
     //* Limits the rate of change
     frc::SlewRateLimiter<units::scalar> m_speeder;
 };
+#endif

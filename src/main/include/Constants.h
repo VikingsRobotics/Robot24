@@ -23,6 +23,9 @@
 
 #include <frc/trajectory/TrapezoidProfile.h>
 
+#include <math.h>
+#include <numbers>
+
 /**
  * The Constants header provides a convenient place for teams to hold robot-wide
  * numerical or boolean constants.  This should not be used for any other
@@ -33,14 +36,14 @@
  * they are needed.
  */
 
-#pragma Debug 
+// regionDebug 
 
-#define REMOVE_SWERVE 1
+//#define REMOVE_SWERVE 1
 //#define REMOVE_RAMP 1
-#define REMOVE_SOLENOID 1
-#define REMOVE_AUTO 1
+//#define REMOVE_SOLENOID 1
+//#define REMOVE_AUTO 1
 
-#pragma endDebug
+// endregionDebug
 
 namespace Operator {
 //* USB Port to the first controller connected to PC

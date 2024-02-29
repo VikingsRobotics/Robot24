@@ -33,6 +33,7 @@ public:
     bool IsRampUp();
 #endif
     void SpoolUpLaunchers();
+    void SlowSpoolUpLaunchers();
     void Fire();
     void StageNoteForLaunch();
 

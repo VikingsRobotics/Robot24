@@ -10,6 +10,7 @@
 #include <frc2/command/Commands.h>
 
 #include <frc/smartdashboard/SendableChooser.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 #include "Constants.h"
 #include "subsystems/SwerveSubsystem.h"

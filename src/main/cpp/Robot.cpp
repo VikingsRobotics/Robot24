@@ -11,6 +11,7 @@
 void Robot::RobotInit() {
   std::unique_ptr<pathplanner::Pathfinder> pathFinder{std::make_unique<pathplanner::LocalADStar>()};
   pathplanner::Pathfinding::setPathfinder(std::move(pathFinder));
+  frc::SmartDashboard::PutData(&frc2::CommandScheduler::GetInstance());
 }
 
 void Robot::RobotPeriodic() {

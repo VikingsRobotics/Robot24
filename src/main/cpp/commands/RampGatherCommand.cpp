@@ -1,5 +1,5 @@
 #include "commands/RampGatherCommand.h"
-
+#ifndef REMOVE_RAMP
 RampGatherCommand::RampGatherCommand(RampSubsystem* const subsystem) : m_subsystem{subsystem}
 {
     AddRequirements(m_subsystem);
@@ -22,3 +22,4 @@ void RampGatherCommand::End(bool interrupted)
 {
     m_subsystem->Stop();
 }
+#endif

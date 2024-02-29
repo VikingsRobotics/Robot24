@@ -3,80 +3,111 @@
 #include <frc2/command/InstantCommand.h>
 
 #include "Constants.h"
-
-RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem) : 
+#ifndef REMOVE_RAMP
+RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem,bool disableSolenoid,bool direction) : 
     m_subsystem{subsystem}
 {
     AddRequirements(m_subsystem);
     
     SetName("Launch Command");
     
-    AddCommands(
 #ifndef REMOVE_SOLENOID
-        GetSolenoidCommand(),
+    if(!disableSolenoid)
+    {
+        AddCommands(
+            GetSolenoidCommand(direction)
+        );
+    }
 #endif
-        MoveLoaderDistanceCommand(Ramp::kLoaderSpeed, Ramp::kRetreatTime,true),
+    AddCommands(
+        MoveLoaderDistanceCommand(Ramp::kRetreatTime,true),
         SetLauncherVelocityCommand(Ramp::kVelocityTime),
-        MoveLoaderDistanceCommand(-Ramp::kLoaderSpeed, 2 * Ramp::kRetreatTime,false)
+        MoveLoaderDistanceCommand(2 * Ramp::kRetreatTime,false)
     );
 }
 #ifndef REMOVE_SOLENOID
-frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand()
+frc2::FunctionalCommand RampLaunchCommand::GetSolenoidCommand(bool direction)
 {
+    if(direction)
+    {
+        return frc2::FunctionalCommand{
+            [rampsub = this->m_subsystem]() {
+                if(rampsub->IsRampDown()) { rampsub->SetRampUp();}
+                rampsub->Stop();
+            },
+            [](){;},
+            [](bool interrupted){;},
+            [rampsub = this->m_subsystem]()->bool{ return rampsub->IsRampUp(); },
+            {m_subsystem}
+        };
+    }
     return frc2::FunctionalCommand{
-        [this]() {
-            if(!m_subsystem->IsRampDown()) { m_subsystem->SetRampUp();}
-            m_subsystem->Stop();
+        [rampsub = this->m_subsystem]() {
+            if(rampsub->IsRampUp()) { rampsub->SetRampDown();}
+            rampsub->Stop();
         },
         [](){;},
         [](bool interrupted){;},
-        [this]()->bool{ return m_subsystem->IsRampUp(); }
+        [rampsub = this->m_subsystem]()->bool{ return rampsub->IsRampDown(); },
+        {m_subsystem}
     };
 }
 #endif
-frc2::ParallelCommandGroup RampLaunchCommand::MoveLoaderDistanceCommand(double speed, units::second_t time,bool retreatCheck)
+frc2::ParallelRaceGroup RampLaunchCommand::MoveLoaderDistanceCommand(units::second_t time,bool retreatCheck)
 {
     if(retreatCheck)
     {
-        return frc2::ParallelCommandGroup{
+        return frc2::ParallelRaceGroup{
             frc2::FunctionalCommand{ 
-                [this,speed]() {
-                    if(!m_subsystem->retreated) { m_subsystem->StageNoteForLaunch(); }
+                [rampsub = this->m_subsystem]() {
+                    if(!rampsub->retreated) { rampsub->StageNoteForLaunch(); }
                 },
                 [](){},
-                [](bool interrupted){},
-                [this](){ return m_subsystem->retreated; }
+                [rampsub = this->m_subsystem](bool interrupted){
+                    rampsub->Stop();
+                },
+                [rampsub = this->m_subsystem](){ return rampsub->retreated; },
+                {m_subsystem}
             },
-            frc2::SequentialCommandGroup{frc2::WaitCommand{time},frc2::InstantCommand([this](){ m_subsystem->retreated = true; })}};
+            frc2::SequentialCommandGroup{frc2::WaitCommand{time},frc2::InstantCommand([rampsub = this->m_subsystem](){ rampsub->retreated = true; })}};
     }
-    return frc2::ParallelCommandGroup{
+    return frc2::ParallelRaceGroup{
         frc2::FunctionalCommand{
-            [this,speed]() {
-                m_subsystem->Fire();
+            [rampsub = this->m_subsystem]() {
+                rampsub->Fire();
             },
             [](){},
-            [this](bool interrupted){
-                m_subsystem->Stop();
-                m_subsystem->retreated = false;
+            [rampsub = this->m_subsystem](bool interrupted){
+                rampsub->Stop();
+                rampsub->retreated = false;
             },
-            [](){ return false; }
+            [](){ return false; },
+            {m_subsystem}
         },
         frc2::WaitCommand{time}};
 }
 
-frc2::ParallelCommandGroup RampLaunchCommand::SetLauncherVelocityCommand(units::second_t time)
+frc2::ParallelRaceGroup RampLaunchCommand::SetLauncherVelocityCommand(units::second_t time)
 {
-    return frc2::ParallelCommandGroup{
+    return frc2::ParallelRaceGroup{
         frc2::FunctionalCommand{
-            [this]() {
-                m_subsystem->SpoolUpLaunchers();
+            [rampsub = this->m_subsystem]() {
+                if(rampsub->IsRampDown())
+                {
+                    rampsub->SlowSpoolUpLaunchers();
+                }
+                else
+                {
+                    rampsub->SpoolUpLaunchers();
+                }
             },
             [](){},
-            [this](bool interrupted){
-                m_subsystem->Stop();
-                m_subsystem->retreated = false;
+            [rampsub = this->m_subsystem](bool interrupted){
+                rampsub->retreated = false;
             },
-            [](){ return false; }
+            [](){ return false; },
+            {m_subsystem}
         },
         frc2::WaitCommand{time}};
 }
+#endif

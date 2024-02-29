@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Constants.h"
+#ifndef REMOVE_SWERVE
 #include "subsystems/SwerveSubsystem.h"
 
 #include <frc2/command/Command.h>
@@ -41,6 +42,7 @@ public:
     */
     void End(bool interrupted) override;
     
+    void SetDashboardFunc(std::function<void(bool)> dashboard);
 private:
     //* Pointer const to swerve subsystem
     SwerveSubsystem* const m_subsystem;
@@ -54,6 +56,8 @@ private:
     std::function<bool(void)> m_brakeFunc;
     //* Retrieves input from user every time executed
     std::function<bool(void)> m_fieldFunc;
+    //* Allows user to update dashboard
+    std::function<void(bool)> m_dashboard = nullptr;
     //* Limits the amount of change over seconds
     frc::SlewRateLimiter<units::scalar> m_xLimiter;
     //* Limits the amount of change over seconds
@@ -61,3 +65,4 @@ private:
     //* Limits the amount of change over seconds
     frc::SlewRateLimiter<units::scalar> m_aLimiter;
 };
+#endif

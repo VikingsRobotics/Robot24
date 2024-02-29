@@ -7,7 +7,7 @@
 #include <frc/MathUtil.h>
 #include <units/time.h>
 #include <frc/smartdashboard/SmartDashboard.h>
-
+#ifndef REMOVE_SWERVE
 SwerveDriveCommand::SwerveDriveCommand(SwerveSubsystem* const subsystem,std::function<double(void)> xSpdFunc,
     std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,std::function<bool(void)> brakeFunc,
     std::function<bool(void)> fieldFunc,double rateLimit) : m_subsystem{subsystem},
@@ -21,6 +21,8 @@ m_fieldFunc{std::move(fieldFunc)},m_xLimiter{rateLimit / 1_s},m_yLimiter{rateLim
 }
 
 void SwerveDriveCommand::Execute() {
+    // Allow us to upload to dashboard
+    if(m_dashboard) { m_dashboard(false); }
     // Check if we are currently braking
     if(m_brakeFunc())
     {
@@ -38,6 +40,7 @@ void SwerveDriveCommand::Execute() {
         frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()) :
         frc::ChassisSpeeds(xSpeed,ySpeed,aSpeed));
     frc::SmartDashboard::PutBoolean("Field",m_fieldFunc());
+    frc::SmartDashboard::PutNumber("Robot Heading",m_subsystem->GetHeading().value());
     // Loop all the state and display them to the dashboard
     for(size_t i = 0;i<moduleStates.size();++i)
     {
@@ -49,6 +52,13 @@ void SwerveDriveCommand::Execute() {
 }
 
 void SwerveDriveCommand::End(bool interrupted) {
+    if(m_dashboard) { m_dashboard(true); }
     // Tidy everything up, don't want the robot to keep moving
     m_subsystem->StopModules();
 }
+
+void SwerveDriveCommand::SetDashboardFunc(std::function<void(bool)> dashboard)
+{
+    m_dashboard = std::move(dashboard);
+}
+#endif

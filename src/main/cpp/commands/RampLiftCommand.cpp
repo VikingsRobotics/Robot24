@@ -1,5 +1,5 @@
 #include "commands/RampLiftCommand.h"
-
+#if !defined(REMOVE_RAMP) && !defined(REMOVE_SOLENOID)
 RampLiftCommand::RampLiftCommand(RampSubsystem* const subsystem) : m_subsystem{subsystem}
 {
     AddRequirements(m_subsystem);
@@ -16,3 +16,4 @@ bool RampLiftCommand::IsFinished()
 {
     return m_subsystem->IsRampUp();
 }
+#endif

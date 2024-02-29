@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Constants.h"
+#if !defined(REMOVE_SOLENOID) && !defined(REMOVE_RAMP)
 #include "subsystems/RampSubsystem.h"
 
 #include <frc2/command/CommandHelper.h>
@@ -15,3 +16,4 @@ public:
 private:
     RampSubsystem* const m_subsystem;
 };
+#endif

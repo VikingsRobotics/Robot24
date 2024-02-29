@@ -3,7 +3,7 @@
 #include <frc/smartdashboard/SmartDashboard.h>
 
 #include "Constants.h"
-
+#ifndef REMOVE_SWERVE
 SwerveTesterCommand::SwerveTesterCommand(SwerveSubsystem* subsystem,RampDirection bDirection,units::second_t time) : 
     m_subsystem(subsystem), m_speed(bDirection ? Swerve::Mechanism::kPhysicalMoveMax.value() : 0), m_direction(bDirection),m_speeder(Swerve::Mechanism::kPhysicalMoveMax.value() / time) 
 {
@@ -44,3 +44,4 @@ void SwerveTesterCommand::End(bool bInterupted)
     // Tidy everything up, don't want the robot to keep moving
     m_subsystem->StopModules();
 }
+#endif

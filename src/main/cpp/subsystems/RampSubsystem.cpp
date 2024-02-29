@@ -6,7 +6,9 @@
 RampSubsystem::RampSubsystem()
 {
     SetName("Ramp Subsystem");
-
+    m_sweeperMotor.SetInverted(true);
+    m_launcherLeftMotor.SetInverted(false);
+    m_launcherRightMotor.SetInverted(true);
 
     SetDefaultCommand(frc2::RunCommand{
         [this]{
@@ -19,8 +21,9 @@ RampSubsystem::RampSubsystem()
     GetDefaultCommand()->SetName("Inactive Command");
     frc::SmartDashboard::PutData(GetDefaultCommand());
     frc::SmartDashboard::PutData(this);
-    
+#ifndef REMOVE_SOLENOID
     frc::SmartDashboard::PutData("Ramp Solenoid", &m_solenoid);
+#endif
 }
 
 void RampSubsystem::Stop()
@@ -33,7 +36,7 @@ void RampSubsystem::Stop()
 
 void RampSubsystem::Gather()
 {
-    m_sweeperMotor.Set(.5);
+    m_sweeperMotor.Set(.75);
     m_feederMotor.Set(.7);
 }
 
@@ -49,6 +52,12 @@ void RampSubsystem::SpoolUpLaunchers()
     m_launcherRightMotor.Set(1);
 }
 
+void RampSubsystem::SlowSpoolUpLaunchers()
+{
+    m_launcherLeftMotor.Set(0.4);
+    m_launcherRightMotor.Set(0.4);
+}
+
 /// @brief This backs the note down so that it's not engaged with the launchers
 void RampSubsystem::StageNoteForLaunch()
 {
@@ -61,7 +70,7 @@ void RampSubsystem::Fire()
 {
     m_feederMotor.Set(.4);
 }
-
+#ifndef REMOVE_SOLENOID
 bool RampSubsystem::IsRampDown() 
 { 
     return m_solenoid.Get() == frc::DoubleSolenoid::Value::kReverse; 
@@ -81,7 +90,7 @@ void RampSubsystem::SetRampUp()
 {
     m_solenoid.Set(frc::DoubleSolenoid::Value::kForward);
 }
-
+#endif
 void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
 {
     SubsystemBase::InitSendable(builder);
