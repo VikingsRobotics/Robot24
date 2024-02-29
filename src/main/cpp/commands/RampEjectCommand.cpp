@@ -1,15 +1,15 @@
-#include "commands/RampGatherCommand.h"
+#include "commands/RampEjectCommand.h"
 #include <memory>
 #ifndef REMOVE_RAMP
-RampGatherCommand::RampGatherCommand(RampSubsystem* const subsystem,std::function<std::pair<double,double>()> speed) : 
+RampEjectCommand::RampEjectCommand(RampSubsystem* const subsystem,std::function<std::pair<double,double>()> speed) : 
     m_subsystem{subsystem},m_speedFunc{std::move(speed)}
 {
     AddRequirements(m_subsystem);
     
-    SetName("Gather Command");
+    SetName("Eject Command");
 }
 
-void RampGatherCommand::Initialize() 
+void RampEjectCommand::Initialize() 
 {
 #ifndef REMOVE_SOLENOID
     if (!m_subsystem->IsRampDown()) 
@@ -18,10 +18,10 @@ void RampGatherCommand::Initialize()
     }
 #endif
     auto [sweeper,feeder] = m_speedFunc();
-    m_subsystem->Gather(sweeper,feeder);
+    m_subsystem->Eject(sweeper,feeder);
 }
 
-void RampGatherCommand::End(bool interrupted)
+void RampEjectCommand::End(bool interrupted)
 {
     m_subsystem->Stop();
 }

@@ -8,10 +8,10 @@
 #include <functional>
 #include <utility>
 
-class RampGatherCommand : public frc2::CommandHelper<frc2::Command,RampGatherCommand>
+class RampEjectCommand : public frc2::CommandHelper<frc2::Command,RampEjectCommand>
 {
 public:
-    RampGatherCommand(RampSubsystem* const subsystem,std::function<std::pair<double,double>()> speed = []->std::pair<double,double>{return {0.85,0.7};});
+    RampEjectCommand(RampSubsystem* const subsystem,std::function<std::pair<double,double>()> speed = []->std::pair<double,double>{return {0.85,0.7};});
 
     void Initialize() override;
     void End(bool interrupted) override;

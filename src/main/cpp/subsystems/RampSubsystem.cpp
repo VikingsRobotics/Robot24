@@ -34,16 +34,16 @@ void RampSubsystem::Stop()
     m_launcherLeftMotor.Set(0);
 }
 
-void RampSubsystem::Gather()
+void RampSubsystem::Gather(double sweeper,double feeder)
 {
-    m_sweeperMotor.Set(.75);
-    m_feederMotor.Set(.7);
+    m_sweeperMotor.Set(sweeper);
+    m_feederMotor.Set(feeder);
 }
 
-void RampSubsystem::Eject()
+void RampSubsystem::Eject(double sweeper,double feeder)
 {
-    m_sweeperMotor.Set(-.7);
-    m_feederMotor.Set(-.5);
+    m_sweeperMotor.Set(-sweeper);
+    m_feederMotor.Set(-feeder);
 }
 
 void RampSubsystem::SpoolUpLaunchers()
@@ -98,9 +98,9 @@ void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
     builder.AddBooleanProperty("Feeder Motor Active", [this]{ return m_feederMotor.Get() != 0; }, nullptr);
     builder.AddDoubleProperty("Launcher Right Velocity",
         [this]{ return m_launcherRightMotor.Get(); },
-        [this](double value){ m_launcherRightMotor.Set(value); });
+        nullptr);
     builder.AddDoubleProperty("Launcher Left Velocity",
         [this]{ return m_launcherLeftMotor.Get(); },
-        [this](double value){ m_launcherLeftMotor.Set(value); });
+        nullptr);
     builder.AddBooleanProperty("Retreated", [this]{ return retreated; }, [this](bool value){ retreated = value; });
 }

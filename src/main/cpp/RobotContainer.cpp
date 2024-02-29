@@ -12,12 +12,14 @@
 #include <units/angular_velocity.h>
 
 #include <cmath>
+#include <utility>
 
 #include <frc2/command/Commands.h>
 #include <frc2/command/ConditionalCommand.h>
 #include "commands/SwerveDriveCommand.h"
 #include "commands/SwerveTesterCommand.h"
 #include "commands/RampGatherCommand.h"
+#include "commands/RampEjectCommand.h"
 #include "commands/RampLaunchCommand.h"
 #include "commands/RampLiftCommand.h"
 #include "commands/RampDropCommand.h"
@@ -73,9 +75,20 @@ void RobotContainer::ConfigureBindings() {
   #endif
   m_assistController.B().OnTrue(m_rampSubsystem.GetDefaultCommand());
 
-  frc2::CommandPtr gatherCommand = RampGatherCommand(&m_rampSubsystem).ToPtr();
+  auto speedFunc = [this]->std::pair<double,double>{
+    return {0.75 + 0.25 * -m_assistController.GetLeftY(),0.7};
+    // 1 -> 1,0.7
+    // 0 -> 0.75,0.7
+    //-1 -> 0.5,0.7
+  };
+
+  frc2::CommandPtr gatherCommand = RampGatherCommand(&m_rampSubsystem,speedFunc).ToPtr();
   frc::SmartDashboard::PutData("Ramp Gather", gatherCommand.get());
   m_assistController.A().WhileTrue(std::move(gatherCommand));
+
+  frc2::CommandPtr ejectCommand = RampEjectCommand(&m_rampSubsystem,speedFunc).ToPtr();
+  frc::SmartDashboard::PutData("Ramp Eject", ejectCommand.get());
+  m_assistController.Back().WhileTrue(std::move(ejectCommand));
 
   frc2::CommandPtr launchUpRampCommand = RampLaunchCommand(&m_rampSubsystem,false,true).ToPtr();
   frc::SmartDashboard::PutData("Launch Up Ramp",launchUpRampCommand.get());
@@ -170,7 +183,10 @@ void RobotContainer::GenerateSendable()
     {
       if(entry.is_directory()) { return; }
       if(!entry.path().string().ends_with(".auto")) { return; }
-      autoPaths.emplace_back(entry.path().string().substr(0,entry.path().string().find('.')));
+      if(!entry.exists()){return;}
+      auto path = entry.path().filename().string();
+      path = path.substr(0,path.find_first_of('.'));
+      autoPaths.emplace_back(path);
     }
   }
 

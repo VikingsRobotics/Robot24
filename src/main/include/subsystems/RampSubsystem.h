@@ -23,8 +23,8 @@ public:
     RampSubsystem();
 
     void Stop();
-    void Gather();
-    void Eject();
+    void Gather(double sweeper,double feeder);
+    void Eject(double sweeper,double feeder);
 #ifndef REMOVE_SOLENOID
     void SetRampDown();
     void SetRampUp();
