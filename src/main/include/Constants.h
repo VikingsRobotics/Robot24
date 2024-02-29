@@ -8,6 +8,9 @@
 #include <units/angular_velocity.h>
 #include <units/voltage.h>
 #include <units/length.h>
+#include <units/acceleration.h>
+#include <units/angular_acceleration.h>
+#include <units/time.h>
 
 #include <frc/PneumaticsModuleType.h>
 
@@ -17,6 +20,11 @@
 #include <rev/AbsoluteEncoder.h>
 
 #include <frc/kinematics/SwerveDriveKinematics.h>
+
+#include <frc/trajectory/TrapezoidProfile.h>
+
+#include <math.h>
+#include <numbers>
 
 /**
  * The Constants header provides a convenient place for teams to hold robot-wide
@@ -28,18 +36,45 @@
  * they are needed.
  */
 
+// regionDebug 
+
+//#define REMOVE_SWERVE 1
+//#define REMOVE_RAMP 1
+//#define REMOVE_SOLENOID 1
+//#define REMOVE_AUTO 1
+
+// endregionDebug
+
 namespace Operator {
 //* USB Port to the first controller connected to PC
 constexpr int kDriverControllerPort = 0;
+
+constexpr int kAssistControllerPort = 1;
     namespace Drive
     {
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
     //* TeleOp drivers controlling movement speed
-    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 5.0_mps;
+    constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
+    //* TeleOp drivers lowest normal speed
+    constexpr units::meters_per_second_t kDriveMoveSpeedLow = 1.5_mps;
+    //* Percent that the low speed on the range max speed
+    constexpr double kPercentDriveLow = kDriveMoveSpeedLow/kDriveMoveSpeedMax;
+    //* Precision drivers lowest speed
+    constexpr units::meters_per_second_t kDrivePrecision = 0.6_mps;
+    //* Percent that the precision speed on the range max speed
+    constexpr double kPercentDrivePrecision = kDrivePrecision/kDriveMoveSpeedMax;
+    //* When the throttle axis transforms into precision control on joystick
+    constexpr double kPrecisionThrottleThreshold = -0.6;
     //* TeleOp drivers controlling angular speed
-    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 6.0_rad_per_s;
+    constexpr units::radians_per_second_t kDriveAngleSpeedMax = 3.0_rad_per_s;
     } // namespace Drive
+    namespace Assist
+    {
+        constexpr units::second_t kDebouncePeriodLift = 1_s;
+
+        constexpr units::second_t kDebouncePeriodLaunch = 1_s;
+    } // namespace Assist
 }  // namespace OperatorConstants
 //* namespace for device IDs
 namespace Device
@@ -64,8 +99,18 @@ constexpr int kBLAngleMotorId = 7;
 constexpr int kBRDriveMotorId = 8;
 //* (CANBUS) ID for the Back Right NEO 550 turning motor (REV)
 constexpr int kBRAngleMotorId = 9;
-//* (CANBUS) ID for Pneumatics Solenoid (REV PH)
-constexpr int kPneumaticId = 0;
+
+constexpr int kSweeperMotorId = 1;
+
+constexpr int kFeederMotorId = 0;
+
+constexpr int kTopRightMotorId = 2;
+
+constexpr int kTopLeftMotorId = 3;
+
+constexpr int kPneumaticForwardId = 0;
+
+constexpr int kPneumaticBackwardId = 1;
     //* subnamespace for internal device info
     namespace Internal
     {
@@ -73,6 +118,8 @@ constexpr int kPneumaticId = 0;
     constexpr rev::CANSparkMax::MotorType kSparkMotorType = rev::CANSparkMax::MotorType::kBrushless;
     //* Default encoder type used for spark absolute encoders
     constexpr rev::SparkAbsoluteEncoder::Type kSparkAbsEncoderType = rev::SparkAbsoluteEncoder::Type::kDutyCycle;
+
+    constexpr rev::SparkRelativeEncoder::Type kSparkRelEncoderType = rev::SparkRelativeEncoder::Type::kHallSensor;
     //* Invert absolute encoder to match direction of motor movement
     constexpr bool kInvertEncoder = true;
     //* @deprecated How many encoder ticks are in one rotation
@@ -80,9 +127,20 @@ constexpr int kPneumaticId = 0;
     //* @deprecated How many encoder ticks are in one rotation
     constexpr int KTalonResolution = 2048;
     //* Type of control module for the pneumatics
-    constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::REVPH;
+    constexpr frc::PneumaticsModuleType kPneumaticType = frc::PneumaticsModuleType::CTREPCM;
     }
 } // namespace CanBus
+namespace Ramp
+{
+
+    constexpr double kLoaderSpeed{0.5};
+
+    constexpr units::second_t kRetreatTime{1};
+
+    constexpr units::second_t kVelocityTime{1};
+
+
+}
 //* namespace containing all swerve module constants
 namespace Swerve
 {
@@ -128,4 +186,19 @@ namespace Swerve
     */
     extern frc::SwerveDriveKinematics<4> kDriveKinematics;
     } // namespace System
+    namespace Auto
+    {
+    
+    constexpr double kPTranslationController = 1;
+
+    constexpr double kPRotationController = 1;
+
+    constexpr units::meters_per_second_t kMaxSpeed = 5_mps;
+
+    constexpr units::meters_per_second_squared_t kMaxAcceleration = 3_mps_sq;
+
+    constexpr units::radians_per_second_t kMaxAngularSpeed = 540_deg_per_s;
+
+    constexpr units::radians_per_second_squared_t kMaxAngularAcceleration = 720_deg_per_s_sq;
+    }
 } // namespace Swerve

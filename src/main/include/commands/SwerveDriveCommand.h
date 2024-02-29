@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Constants.h"
+#ifndef REMOVE_SWERVE
 #include "subsystems/SwerveSubsystem.h"
 
 #include <frc2/command/Command.h>
@@ -21,13 +22,17 @@ public:
      * swerve subsystem multiplied by kDriveMoveSpeedMax for speed
      * @param aSpdFunc function that returns [-1,1] for angluar speed of swerve subsystem
      * multiplied by kDriveAngleSpeedMax for speed
+     * @param brakeFunc function that returns [true,false] (default: false) for if swerve subsystem
+     * should stop all motion 
      * @param fieldFunc function that returns [true,false] (default: true) for if swerve subsystem
      * are field centric
      * @param rateLimit double (default: 3) that determines how quickly output equals input,
      * 1 = 100% per sec
     */
     SwerveDriveCommand(SwerveSubsystem* const subsystem,std::function<double(void)> xSpdFunc,
-    std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,std::function<bool(void)> fieldFunc = []{return true;},double rateLimit = 3);
+        std::function<double(void)> ySpdFunc,std::function<double(void)> aSpdFunc,
+        std::function<bool(void)> brakeFunc = []{return false;},std::function<bool(void)> fieldFunc = []{return true;},
+        double rateLimit = 3);
     //* Command overloaded function: Executes every command schedule pass if has access to subsystem
     void Execute() override;
     /** 
@@ -37,6 +42,7 @@ public:
     */
     void End(bool interrupted) override;
     
+    void SetDashboardFunc(std::function<void(bool)> dashboard);
 private:
     //* Pointer const to swerve subsystem
     SwerveSubsystem* const m_subsystem;
@@ -47,7 +53,11 @@ private:
     //* Retrieves input from user every time executed
     std::function<double(void)> m_aSpdFunc;
     //* Retrieves input from user every time executed
+    std::function<bool(void)> m_brakeFunc;
+    //* Retrieves input from user every time executed
     std::function<bool(void)> m_fieldFunc;
+    //* Allows user to update dashboard
+    std::function<void(bool)> m_dashboard = nullptr;
     //* Limits the amount of change over seconds
     frc::SlewRateLimiter<units::scalar> m_xLimiter;
     //* Limits the amount of change over seconds
@@ -55,3 +65,4 @@ private:
     //* Limits the amount of change over seconds
     frc::SlewRateLimiter<units::scalar> m_aLimiter;
 };
+#endif

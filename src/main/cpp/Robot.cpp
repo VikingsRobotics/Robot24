@@ -5,8 +5,14 @@
 #include "Robot.h"
 
 #include <frc2/command/CommandScheduler.h>
+#include <pathplanner/lib/pathfinding/Pathfinding.h>
+#include <pathplanner/lib/pathfinding/LocalADStar.h>
 
-void Robot::RobotInit() {}
+void Robot::RobotInit() {
+  std::unique_ptr<pathplanner::Pathfinder> pathFinder{std::make_unique<pathplanner::LocalADStar>()};
+  pathplanner::Pathfinding::setPathfinder(std::move(pathFinder));
+  frc::SmartDashboard::PutData(&frc2::CommandScheduler::GetInstance());
+}
 
 void Robot::RobotPeriodic() {
   frc2::CommandScheduler::GetInstance().Run();
@@ -19,8 +25,8 @@ void Robot::DisabledPeriodic() {}
 void Robot::AutonomousInit() {
   m_autonomousCommand = m_container.GetAutonomousCommand();
 
-  if (m_autonomousCommand && m_autonomousCommand.has_value()) {
-    m_autonomousCommand->Schedule();
+  if (m_autonomousCommand) {
+    m_autonomousCommand.value()->Schedule();
   }
 }
 
@@ -32,7 +38,7 @@ void Robot::TeleopInit() {
   // continue until interrupted by another command, remove
   // this line or comment it out.
   if (m_autonomousCommand) {
-    m_autonomousCommand->Cancel();
+    m_autonomousCommand.value()->Cancel();
   }
 }
 

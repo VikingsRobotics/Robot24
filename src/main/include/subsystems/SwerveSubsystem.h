@@ -5,6 +5,9 @@
 
 #include <units/angle.h>
 
+#include <frc/kinematics/ChassisSpeeds.h>
+#include <frc/smartdashboard/Field2d.h>
+
 #include <ctre/phoenix6/Pigeon2.hpp>
 
 #include <frc2/command/CommandPtr.h>
@@ -21,6 +24,8 @@ public:
   SwerveSubsystem();
   //* Subsystem overloaded function: executed every command schedule pass
   void Periodic() override;
+
+  void InitSendable(wpi::SendableBuilder& builder) override;
   //* Sets the current rotation as 0
   void ZeroHeading();
   //* Gets the current rotation in degrees
@@ -42,7 +47,13 @@ public:
    * 
    * @param states* pointer to array of module state that are desired
   */
-  void SetModulesState(wpi::array<frc::SwerveModuleState,4>* states);
+  void SetModulesState(wpi::array<frc::SwerveModuleState,4> states);
+
+  frc::ChassisSpeeds GetCurrentSpeeds();
+
+  void Drive(frc::ChassisSpeeds speed);
+
+  void Brake();
 private:
   //* Gryo used for odometry and for field centric control
   ctre::phoenix6::hardware::Pigeon2 m_gryo{Device::kGyroId,Device::kBusName};
@@ -56,4 +67,6 @@ private:
   SwerveModule m_backRight {Device::kBRDriveMotorId,  Device::kBRAngleMotorId,  std::numbers::pi / 2.0  };
   //* Track the position of the robot using wheel position and gryo rotation
   frc::SwerveDriveOdometry<4> m_odometry;
+
+  frc::Field2d m_field{};
 };
