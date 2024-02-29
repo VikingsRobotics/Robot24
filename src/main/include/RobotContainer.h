@@ -34,7 +34,7 @@ class RobotContainer {
   RobotContainer();
   //* @return CommandPtr for auto, TODO
   frc2::Command* GetAutonomousCommand();
-
+  frc2::Command* GetBrakeCommand();
  private:
 #ifndef REMOVE_SWERVE
   void SetSwerveDefaultCommandXbox(frc2::CommandXboxController& control);

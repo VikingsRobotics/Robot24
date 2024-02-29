@@ -54,6 +54,8 @@ constexpr int kAssistControllerPort = 1;
     {
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
+
+    constexpr double kDriveAngleDeadband = 0.2;
     //* TeleOp drivers controlling movement speed
     constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
     //* TeleOp drivers lowest normal speed
@@ -133,13 +135,21 @@ constexpr int kPneumaticBackwardId = 1;
 namespace Ramp
 {
 
-    constexpr double kLoaderSpeed{0.5};
+    constexpr double kRetreatSpeed{0.55};
 
-    constexpr units::second_t kRetreatTime{1};
+    constexpr double kRetreatSpeedSlow{0.20};
 
-    constexpr units::second_t kVelocityTime{1};
+    constexpr double kLaunchSpeed{0.65};
 
+    constexpr double kLauncherSpeedLow{0.515};
 
+    constexpr double kLauncherSpeedHigh{1};
+
+    constexpr units::second_t kRetreatTime{0.5};
+
+    constexpr units::second_t kVelocityTime{0.25};
+
+    constexpr units::second_t kLaunchTime{2};
 }
 //* namespace containing all swerve module constants
 namespace Swerve

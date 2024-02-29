@@ -9,6 +9,7 @@ RampSubsystem::RampSubsystem()
     m_sweeperMotor.SetInverted(true);
     m_launcherLeftMotor.SetInverted(false);
     m_launcherRightMotor.SetInverted(true);
+    SetRampDown();
 
     SetDefaultCommand(frc2::RunCommand{
         [this]{
@@ -48,27 +49,33 @@ void RampSubsystem::Eject(double sweeper,double feeder)
 
 void RampSubsystem::SpoolUpLaunchers()
 {
-    m_launcherLeftMotor.Set(1);
-    m_launcherRightMotor.Set(1);
+    m_launcherLeftMotor.Set(Ramp::kLauncherSpeedHigh);
+    m_launcherRightMotor.Set(Ramp::kLauncherSpeedHigh);
 }
 
 void RampSubsystem::SlowSpoolUpLaunchers()
 {
-    m_launcherLeftMotor.Set(0.4);
-    m_launcherRightMotor.Set(0.4);
+    m_launcherLeftMotor.Set(Ramp::kLauncherSpeedLow);
+    m_launcherRightMotor.Set(Ramp::kLauncherSpeedLow);
 }
 
 /// @brief This backs the note down so that it's not engaged with the launchers
 void RampSubsystem::StageNoteForLaunch()
 {
     m_sweeperMotor.Set(0);
-    m_feederMotor.Set(-.3);
+    m_feederMotor.Set(-Ramp::kRetreatSpeed);
+}
+
+void RampSubsystem::StageNoteForLaunchSlow()
+{
+    m_sweeperMotor.Set(0);
+    m_feederMotor.Set(-Ramp::kRetreatSpeedSlow);
 }
 
 /// @brief This pushes the note into the launchers. This is what actually sends the note flying.
 void RampSubsystem::Fire()
 {
-    m_feederMotor.Set(.4);
+    m_feederMotor.Set(Ramp::kLaunchSpeed);
 }
 #ifndef REMOVE_SOLENOID
 bool RampSubsystem::IsRampDown() 

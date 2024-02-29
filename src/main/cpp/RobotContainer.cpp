@@ -16,6 +16,7 @@
 
 #include <frc2/command/Commands.h>
 #include <frc2/command/ConditionalCommand.h>
+#include <frc2/command/RunCommand.h>
 #include "commands/SwerveDriveCommand.h"
 #include "commands/SwerveTesterCommand.h"
 #include "commands/RampGatherCommand.h"
@@ -38,6 +39,10 @@ RobotContainer::RobotContainer()
   pathplanner::NamedCommands::registerCommand("RampLaunchUpCommand",RampLaunchCommand{&m_rampSubsystem,false,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchCommand",RampLaunchCommand{&m_rampSubsystem,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampGatherCommand",RampGatherCommand{&m_rampSubsystem}.ToPtr());
+  pathplanner::NamedCommands::registerCommand("RampStopCommand",frc2::RunCommand{
+      [this]{m_rampSubsystem.Stop();},
+      {&m_rampSubsystem}
+    }.ToPtr());
   #endif
   GenerateSendable();  
   frc::SmartDashboard::PutData(&m_chooser);
@@ -112,6 +117,12 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   return nullptr;
 #endif
 }
+
+frc2::Command* RobotContainer::GetBrakeCommand()
+{
+  return m_commands[0].get();
+}
+
 #ifndef REMOVE_SWERVE
 void RobotContainer::SetSwerveDefaultCommandXbox(frc2::CommandXboxController& control)
 {
@@ -191,7 +202,7 @@ void RobotContainer::GenerateSendable()
   }
 
   
-  m_commands.emplace_back(frc2::cmd::None());
+  m_commands.emplace_back(frc2::cmd::Run([this]{m_swerveSubsystem.Brake();},{&m_swerveSubsystem}).WithName("None"));
   m_chooser.SetDefaultOption("None",m_commands.back().get());
 
   for(std::string const& entry : autoPaths)

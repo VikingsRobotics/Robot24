@@ -36,6 +36,7 @@ public:
     void SlowSpoolUpLaunchers();
     void Fire();
     void StageNoteForLaunch();
+    void StageNoteForLaunchSlow();
 
     void InitSendable(wpi::SendableBuilder& builder) override;
 

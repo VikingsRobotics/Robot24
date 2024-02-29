@@ -30,7 +30,13 @@ void Robot::AutonomousInit() {
   }
 }
 
-void Robot::AutonomousPeriodic() {}
+void Robot::AutonomousPeriodic() {
+  if(!m_autonomousCommand.value()->IsScheduled())
+  {
+    m_autonomousCommand = m_container.GetBrakeCommand();
+    m_autonomousCommand.value()->Schedule();
+  }
+}
 
 void Robot::TeleopInit() {
   // This makes sure that the autonomous stops running when
