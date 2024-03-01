@@ -36,12 +36,17 @@ RobotContainer::RobotContainer()
   // Initialize all of your commands and subsystems here
 #if !defined(REMOVE_SWERVE) && !defined(REMOVE_AUTO)
   #ifndef REMOVE_RAMP
+  pathplanner::NamedCommands::registerCommand("RampDropCommand",RampDropCommand(&m_rampSubsystem).ToPtr());
+  pathplanner::NamedCommands::registerCommand("RampLiftCommand",RampLiftCommand(&m_rampSubsystem).ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchDownCommand",RampLaunchCommand{&m_rampSubsystem,false,false}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchUpCommand",RampLaunchCommand{&m_rampSubsystem,false,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchCommand",RampLaunchCommand{&m_rampSubsystem,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampGatherCommand",RampGatherCommand{&m_rampSubsystem}.ToPtr());
-  pathplanner::NamedCommands::registerCommand("RampStopCommand",frc2::RunCommand{
+  pathplanner::NamedCommands::registerCommand("RampStopCommand",frc2::FunctionalCommand{
       [this]{m_rampSubsystem.Stop();},
+      []{},
+      [](bool){},
+      []{return true},
       {&m_rampSubsystem}
     }.ToPtr());
   #endif
@@ -49,18 +54,24 @@ RobotContainer::RobotContainer()
   frc::SmartDashboard::PutData(&m_chooser);
 #endif
 #ifndef REMOVE_SWERVE
-  m_resetCommand = SwerveResetCommand(&m_swerveSubsystem).ToPtr();
-  frc::SmartDashboard::PutData("Reset Command",m_resetCommand.get());
+  frc2::CommandPtr resetCommand = SwerveResetCommand(&m_swerveSubsystem).ToPtr();
+  frc::SmartDashboard::PutData("Reset Command",resetCommand.get());
   // Get the type of controller
   //if(std::get<frc2::CommandJoystick>(m_driverController).GetType() == frc::GenericHID::HIDType::kHIDJoystick) 
   { 
     m_driverController = frc2::CommandJoystick{Operator::kDriverControllerPort};
     SetSwerveDefaultCommandJoy(std::get<frc2::CommandJoystick>(m_driverController));
+    m_resetTrigger = frc2::Trigger{
+      [this]{return std::get<frc2::CommandJoystick>(m_driverController).GetRawButton(7); }
+    };
+    m_resetTrigger.OnTrue(std::move(resetCommand));
   }
   //else 
   //{ 
   //  m_driverController = frc2::CommandXboxController{Operator::kDriverControllerPort}; 
   //  SetSwerveDefaultCommandXbox(std::get<frc2::CommandXboxController>(m_driverController));
+  //  m_resetTrigger = std::get<frc2::CommandXboxController>(m_driverController).Back();
+  //  m_resetTrigger.OnTrue(std::move(resetCommand));
   //}
 
   // Put the command onto the dashboard so it can be scheduled if something take Swerve Subsystem
@@ -123,10 +134,20 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
 
 frc2::Command* RobotContainer::GetBrakeCommand()
 {
-  return m_commands[0].get();
+#ifndef REMOVE_AUTO
+  return m_commands[0].get(); 
+#else
+  m_resetCommand = frc2::cmd::None();
+  return m_resetCommand.get();
+#endif
 }
 
 #ifndef REMOVE_SWERVE
+SwerveSubsystem& RobotContainer::GetSwerve()
+{
+  return m_swerveSubsystem;
+}
+
 void RobotContainer::SetSwerveDefaultCommandXbox(frc2::CommandXboxController& control)
 {
   SwerveDriveCommand driveCommand = SwerveDriveCommand(&m_swerveSubsystem,

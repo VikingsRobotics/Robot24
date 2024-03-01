@@ -23,6 +23,7 @@ void Robot::DisabledInit() {}
 void Robot::DisabledPeriodic() {}
 
 void Robot::AutonomousInit() {
+  m_container.GetSwerve().ZeroHeading();
   m_autonomousCommand = m_container.GetAutonomousCommand();
 
   if (m_autonomousCommand) {

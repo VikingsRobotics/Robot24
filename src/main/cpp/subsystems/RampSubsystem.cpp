@@ -6,10 +6,13 @@
 RampSubsystem::RampSubsystem()
 {
     SetName("Ramp Subsystem");
-    m_sweeperMotor.SetInverted(true);
+    m_sweeperMotor.SetInverted(false);
+    m_feederMotor.SetInverted(false);
     m_launcherLeftMotor.SetInverted(false);
     m_launcherRightMotor.SetInverted(true);
-    SetRampDown();
+#ifndef REMOVE_SOLENOID
+    SetRampUp();
+#endif
 
     SetDefaultCommand(frc2::RunCommand{
         [this]{

@@ -39,7 +39,7 @@ void SwerveDriveCommand::Execute() {
     wpi::array<frc::SwerveModuleState,4> moduleStates = Swerve::System::kDriveKinematics.ToSwerveModuleStates( m_fieldFunc() ?
         frc::ChassisSpeeds::FromFieldRelativeSpeeds(xSpeed, ySpeed, aSpeed,m_subsystem->GetRotation2d()) :
         frc::ChassisSpeeds(xSpeed,ySpeed,aSpeed));
-    frc::SmartDashboard::PutBoolean("Field",m_fieldFunc());
+    frc::SmartDashboard::PutBoolean("Field Orient",m_fieldFunc());
     frc::SmartDashboard::PutNumber("Robot Heading",m_subsystem->GetHeading().value());
     // Loop all the state and display them to the dashboard
     for(size_t i = 0;i<moduleStates.size();++i)

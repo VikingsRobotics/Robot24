@@ -75,7 +75,7 @@ constexpr int kAssistControllerPort = 1;
     {
         constexpr units::second_t kDebouncePeriodLift = 0.2_s;
 
-        constexpr units::second_t kDebouncePeriodLaunch = 0.5_s;
+        constexpr units::second_t kDebouncePeriodLaunch = 0_s;
     } // namespace Assist
 }  // namespace OperatorConstants
 //* namespace for device IDs
@@ -84,7 +84,7 @@ namespace Device
 //* CTRE: Bus name needed for constructors
 constexpr const char * kBusName = "rio";
 //* (CANBUS) ID for the Pigeon 2.0 (CTRE)
-constexpr int kGyroId = 1;
+constexpr int kGyroId = 10;
 //* (CANBUS) ID for the Front Left Falcon 500 driving motor (CTRE)
 constexpr int kFLDriveMotorId = 2;
 //* (CANBUS) ID for the Front Left NEO 550 turning motor (REV)
@@ -143,13 +143,17 @@ namespace Ramp
 
     constexpr double kLauncherSpeedLow{0.55};
 
-    constexpr double kLauncherSpeedHigh{1};
+    constexpr double kLauncherSpeedHigh{0.95};
 
     constexpr units::second_t kRetreatTime{0.5};
 
     constexpr units::second_t kVelocityTime{0.25};
 
     constexpr units::second_t kLaunchTime{2};
+
+    constexpr units::second_t kLiftTime{1};
+
+    constexpr units::second_t kDownTime{0};
 }
 //* namespace containing all swerve module constants
 namespace Swerve

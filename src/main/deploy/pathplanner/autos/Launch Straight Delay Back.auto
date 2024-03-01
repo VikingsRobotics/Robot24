@@ -1,0 +1,85 @@
+{
+  "version": 1.0,
+  "startingPose": null,
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "RampLiftCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampLaunchUpCommand"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampDropCommand"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Straight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampGatherCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampStopCommand"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Back Straight"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampLiftCommand"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "RampLaunchUpCommand"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
