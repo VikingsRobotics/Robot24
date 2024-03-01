@@ -54,6 +54,7 @@ class RobotContainer {
 #ifndef REMOVE_SWERVE
   //* Swerve Subsystem: Controls robot movement
   SwerveSubsystem m_swerveSubsystem;
+  frc2::CommandPtr m_resetCommand = frc2::cmd::None();
 #endif
 #ifndef REMOVE_RAMP
   //TODO: ThrowerSubsystem

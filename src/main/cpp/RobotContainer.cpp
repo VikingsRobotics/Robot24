@@ -19,6 +19,7 @@
 #include <frc2/command/RunCommand.h>
 #include "commands/SwerveDriveCommand.h"
 #include "commands/SwerveTesterCommand.h"
+#include "commands/SwerveResetCommand.h"
 #include "commands/RampGatherCommand.h"
 #include "commands/RampEjectCommand.h"
 #include "commands/RampLaunchCommand.h"
@@ -48,6 +49,8 @@ RobotContainer::RobotContainer()
   frc::SmartDashboard::PutData(&m_chooser);
 #endif
 #ifndef REMOVE_SWERVE
+  m_resetCommand = SwerveResetCommand(&m_swerveSubsystem).ToPtr();
+  frc::SmartDashboard::PutData("Reset Command",m_resetCommand.get());
   // Get the type of controller
   //if(std::get<frc2::CommandJoystick>(m_driverController).GetType() == frc::GenericHID::HIDType::kHIDJoystick) 
   { 
