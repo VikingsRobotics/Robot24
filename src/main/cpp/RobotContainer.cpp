@@ -46,7 +46,7 @@ RobotContainer::RobotContainer()
       [this]{m_rampSubsystem.Stop();},
       []{},
       [](bool){},
-      []{return true},
+      []{return true;},
       {&m_rampSubsystem}
     }.ToPtr());
   #endif
@@ -111,15 +111,15 @@ void RobotContainer::ConfigureBindings() {
 
   frc2::CommandPtr launchUpRampCommand = RampLaunchCommand(&m_rampSubsystem,false,true).ToPtr();
   frc::SmartDashboard::PutData("Launch Up Ramp",launchUpRampCommand.get());
-  m_assistController.Y().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchUpRampCommand));
+  m_assistController.Y().OnTrue(std::move(launchUpRampCommand));
 
   frc2::CommandPtr launchDownRampCommand = RampLaunchCommand(&m_rampSubsystem,false,false).ToPtr();
   frc::SmartDashboard::PutData("Launch Down Ramp",launchDownRampCommand.get());
-  m_assistController.X().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchDownRampCommand));
+  m_assistController.X().OnTrue(std::move(launchDownRampCommand));
 
   frc2::CommandPtr launchCommand = RampLaunchCommand(&m_rampSubsystem,true).ToPtr();
   frc::SmartDashboard::PutData("Launch No-Ramp",launchCommand.get());
-  m_assistController.Start().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchCommand));
+  m_assistController.Start().OnTrue(std::move(launchCommand));
 #endif
 }
 

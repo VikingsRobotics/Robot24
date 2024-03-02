@@ -101,7 +101,7 @@ void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4> state
 
 frc::ChassisSpeeds SwerveSubsystem::GetCurrentSpeeds()
 {
-    return Swerve::System::kDriveKinematics.ToChassisSpeeds(m_frontLeft.GetState(),m_frontRight.GetState(),m_backLeft.GetState(),m_backRight.GetState());
+    return Swerve::System::kDriveKinematics.ToChassisSpeeds({m_frontLeft.GetState(),m_frontRight.GetState(),m_backLeft.GetState(),m_backRight.GetState()});
 }
 
 void SwerveSubsystem::Drive(frc::ChassisSpeeds speed)

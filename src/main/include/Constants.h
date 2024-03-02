@@ -55,7 +55,7 @@ constexpr int kAssistControllerPort = 1;
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
 
-    constexpr double kDriveAngleDeadband = 0.5;
+    constexpr double kDriveAngleDeadband = 0.4;
     //* TeleOp drivers controlling movement speed
     constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
     //* TeleOp drivers lowest normal speed
@@ -75,7 +75,6 @@ constexpr int kAssistControllerPort = 1;
     {
         constexpr units::second_t kDebouncePeriodLift = 0.2_s;
 
-        constexpr units::second_t kDebouncePeriodLaunch = 0_s;
     } // namespace Assist
 }  // namespace OperatorConstants
 //* namespace for device IDs
