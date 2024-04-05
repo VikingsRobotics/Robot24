@@ -54,6 +54,8 @@ constexpr int kAssistControllerPort = 1;
     {
     //* Prevents controller from running when under very low values
     constexpr double kDriveDeadband = 0.05;
+
+    constexpr double kDriveAngleDeadband = 0.4;
     //* TeleOp drivers controlling movement speed
     constexpr units::meters_per_second_t kDriveMoveSpeedMax = 3.0_mps;
     //* TeleOp drivers lowest normal speed
@@ -71,9 +73,8 @@ constexpr int kAssistControllerPort = 1;
     } // namespace Drive
     namespace Assist
     {
-        constexpr units::second_t kDebouncePeriodLift = 1_s;
+        constexpr units::second_t kDebouncePeriodLift = 0.2_s;
 
-        constexpr units::second_t kDebouncePeriodLaunch = 1_s;
     } // namespace Assist
 }  // namespace OperatorConstants
 //* namespace for device IDs
@@ -82,7 +83,7 @@ namespace Device
 //* CTRE: Bus name needed for constructors
 constexpr const char * kBusName = "rio";
 //* (CANBUS) ID for the Pigeon 2.0 (CTRE)
-constexpr int kGyroId = 1;
+constexpr int kGyroId = 10;
 //* (CANBUS) ID for the Front Left Falcon 500 driving motor (CTRE)
 constexpr int kFLDriveMotorId = 2;
 //* (CANBUS) ID for the Front Left NEO 550 turning motor (REV)
@@ -133,13 +134,25 @@ constexpr int kPneumaticBackwardId = 1;
 namespace Ramp
 {
 
-    constexpr double kLoaderSpeed{0.5};
+    constexpr double kRetreatSpeed{0.55};
 
-    constexpr units::second_t kRetreatTime{1};
+    constexpr double kRetreatSpeedSlow{0.20};
 
-    constexpr units::second_t kVelocityTime{1};
+    constexpr double kLaunchSpeed{0.515};
 
+    constexpr double kLauncherSpeedLow{0.55};
 
+    constexpr double kLauncherSpeedHigh{0.95};
+
+    constexpr units::second_t kRetreatTime{0.5};
+
+    constexpr units::second_t kVelocityTime{0.25};
+
+    constexpr units::second_t kLaunchTime{2};
+
+    constexpr units::second_t kLiftTime{1};
+
+    constexpr units::second_t kDownTime{0};
 }
 //* namespace containing all swerve module constants
 namespace Swerve

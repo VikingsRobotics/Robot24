@@ -12,12 +12,16 @@
 #include <units/angular_velocity.h>
 
 #include <cmath>
+#include <utility>
 
 #include <frc2/command/Commands.h>
 #include <frc2/command/ConditionalCommand.h>
+#include <frc2/command/RunCommand.h>
 #include "commands/SwerveDriveCommand.h"
 #include "commands/SwerveTesterCommand.h"
+#include "commands/SwerveResetCommand.h"
 #include "commands/RampGatherCommand.h"
+#include "commands/RampEjectCommand.h"
 #include "commands/RampLaunchCommand.h"
 #include "commands/RampLiftCommand.h"
 #include "commands/RampDropCommand.h"
@@ -32,25 +36,42 @@ RobotContainer::RobotContainer()
   // Initialize all of your commands and subsystems here
 #if !defined(REMOVE_SWERVE) && !defined(REMOVE_AUTO)
   #ifndef REMOVE_RAMP
+  pathplanner::NamedCommands::registerCommand("RampDropCommand",RampDropCommand(&m_rampSubsystem).ToPtr());
+  pathplanner::NamedCommands::registerCommand("RampLiftCommand",RampLiftCommand(&m_rampSubsystem).ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchDownCommand",RampLaunchCommand{&m_rampSubsystem,false,false}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchUpCommand",RampLaunchCommand{&m_rampSubsystem,false,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampLaunchCommand",RampLaunchCommand{&m_rampSubsystem,true}.ToPtr());
   pathplanner::NamedCommands::registerCommand("RampGatherCommand",RampGatherCommand{&m_rampSubsystem}.ToPtr());
+  pathplanner::NamedCommands::registerCommand("RampStopCommand",frc2::FunctionalCommand{
+      [this]{m_rampSubsystem.Stop();},
+      []{},
+      [](bool){},
+      []{return true;},
+      {&m_rampSubsystem}
+    }.ToPtr());
   #endif
   GenerateSendable();  
   frc::SmartDashboard::PutData(&m_chooser);
 #endif
 #ifndef REMOVE_SWERVE
+  frc2::CommandPtr resetCommand = SwerveResetCommand(&m_swerveSubsystem).ToPtr();
+  frc::SmartDashboard::PutData("Reset Command",resetCommand.get());
   // Get the type of controller
   //if(std::get<frc2::CommandJoystick>(m_driverController).GetType() == frc::GenericHID::HIDType::kHIDJoystick) 
   { 
     m_driverController = frc2::CommandJoystick{Operator::kDriverControllerPort};
     SetSwerveDefaultCommandJoy(std::get<frc2::CommandJoystick>(m_driverController));
+    m_resetTrigger = frc2::Trigger{
+      [this]{return std::get<frc2::CommandJoystick>(m_driverController).GetRawButton(7); }
+    };
+    m_resetTrigger.OnTrue(std::move(resetCommand));
   }
   //else 
   //{ 
   //  m_driverController = frc2::CommandXboxController{Operator::kDriverControllerPort}; 
   //  SetSwerveDefaultCommandXbox(std::get<frc2::CommandXboxController>(m_driverController));
+  //  m_resetTrigger = std::get<frc2::CommandXboxController>(m_driverController).Back();
+  //  m_resetTrigger.OnTrue(std::move(resetCommand));
   //}
 
   // Put the command onto the dashboard so it can be scheduled if something take Swerve Subsystem
@@ -73,21 +94,32 @@ void RobotContainer::ConfigureBindings() {
   #endif
   m_assistController.B().OnTrue(m_rampSubsystem.GetDefaultCommand());
 
-  frc2::CommandPtr gatherCommand = RampGatherCommand(&m_rampSubsystem).ToPtr();
+  auto speedFunc = [this]->std::pair<double,double>{
+    return {0.75 + 0.25 * -m_assistController.GetLeftY(),0.7};
+    // 1 -> 1,0.7
+    // 0 -> 0.75,0.7
+    //-1 -> 0.5,0.7
+  };
+
+  frc2::CommandPtr gatherCommand = RampGatherCommand(&m_rampSubsystem,speedFunc).ToPtr();
   frc::SmartDashboard::PutData("Ramp Gather", gatherCommand.get());
   m_assistController.A().WhileTrue(std::move(gatherCommand));
 
+  frc2::CommandPtr ejectCommand = RampEjectCommand(&m_rampSubsystem,speedFunc).ToPtr();
+  frc::SmartDashboard::PutData("Ramp Eject", ejectCommand.get());
+  m_assistController.Back().WhileTrue(std::move(ejectCommand));
+
   frc2::CommandPtr launchUpRampCommand = RampLaunchCommand(&m_rampSubsystem,false,true).ToPtr();
   frc::SmartDashboard::PutData("Launch Up Ramp",launchUpRampCommand.get());
-  m_assistController.Y().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchUpRampCommand));
+  m_assistController.Y().OnTrue(std::move(launchUpRampCommand));
 
   frc2::CommandPtr launchDownRampCommand = RampLaunchCommand(&m_rampSubsystem,false,false).ToPtr();
   frc::SmartDashboard::PutData("Launch Down Ramp",launchDownRampCommand.get());
-  m_assistController.X().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchDownRampCommand));
+  m_assistController.X().OnTrue(std::move(launchDownRampCommand));
 
   frc2::CommandPtr launchCommand = RampLaunchCommand(&m_rampSubsystem,true).ToPtr();
   frc::SmartDashboard::PutData("Launch No-Ramp",launchCommand.get());
-  m_assistController.Start().Debounce(Operator::Assist::kDebouncePeriodLaunch).OnTrue(std::move(launchCommand));
+  m_assistController.Start().OnTrue(std::move(launchCommand));
 #endif
 }
 
@@ -99,7 +131,23 @@ frc2::Command* RobotContainer::GetAutonomousCommand() {
   return nullptr;
 #endif
 }
+
+frc2::Command* RobotContainer::GetBrakeCommand()
+{
+#ifndef REMOVE_AUTO
+  return m_commands[0].get(); 
+#else
+  m_resetCommand = frc2::cmd::None();
+  return m_resetCommand.get();
+#endif
+}
+
 #ifndef REMOVE_SWERVE
+SwerveSubsystem& RobotContainer::GetSwerve()
+{
+  return m_swerveSubsystem;
+}
+
 void RobotContainer::SetSwerveDefaultCommandXbox(frc2::CommandXboxController& control)
 {
   SwerveDriveCommand driveCommand = SwerveDriveCommand(&m_swerveSubsystem,
@@ -170,12 +218,15 @@ void RobotContainer::GenerateSendable()
     {
       if(entry.is_directory()) { return; }
       if(!entry.path().string().ends_with(".auto")) { return; }
-      autoPaths.emplace_back(entry.path().string().substr(0,entry.path().string().find('.')));
+      if(!entry.exists()){return;}
+      auto path = entry.path().filename().string();
+      path = path.substr(0,path.find_first_of('.'));
+      autoPaths.emplace_back(path);
     }
   }
 
   
-  m_commands.emplace_back(frc2::cmd::None());
+  m_commands.emplace_back(frc2::cmd::Run([this]{m_swerveSubsystem.Brake();},{&m_swerveSubsystem}).WithName("None"));
   m_chooser.SetDefaultOption("None",m_commands.back().get());
 
   for(std::string const& entry : autoPaths)

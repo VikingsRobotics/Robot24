@@ -34,9 +34,12 @@ class RobotContainer {
   RobotContainer();
   //* @return CommandPtr for auto, TODO
   frc2::Command* GetAutonomousCommand();
-
+  frc2::Command* GetBrakeCommand();
  private:
 #ifndef REMOVE_SWERVE
+public:
+  SwerveSubsystem& GetSwerve();
+private:
   void SetSwerveDefaultCommandXbox(frc2::CommandXboxController& control);
   void SetSwerveDefaultCommandJoy(frc2::CommandJoystick& control);
 #endif
@@ -54,6 +57,7 @@ class RobotContainer {
 #ifndef REMOVE_SWERVE
   //* Swerve Subsystem: Controls robot movement
   SwerveSubsystem m_swerveSubsystem;
+  frc2::Trigger m_resetTrigger;
 #endif
 #ifndef REMOVE_RAMP
   //TODO: ThrowerSubsystem

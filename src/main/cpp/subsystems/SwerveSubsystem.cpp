@@ -35,10 +35,6 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
             pathplanner::ReplanningConfig{}
         },
         []{
-            auto alliance = frc::DriverStation::GetAlliance();
-            if (alliance) {
-                return alliance.value() == frc::DriverStation::Alliance::kRed;
-            }
             return false;
         },
         this
@@ -48,7 +44,7 @@ SwerveSubsystem::SwerveSubsystem() : m_odometry{ Swerve::System::kDriveKinematic
         m_field.GetObject("path")->SetPoses(poses);
     });
 
-    frc::SmartDashboard::PutData("Field", &m_field);
+    frc::SmartDashboard::PutData("Field Picture", &m_field);
     frc::SmartDashboard::PutData(this);
 }
 
@@ -70,7 +66,9 @@ void SwerveSubsystem::ZeroHeading() { m_gryo.Reset(); }
 
 units::degree_t SwerveSubsystem::GetHeading() { 
     double angle = m_gryo.GetAngle();
-    return units::degree_t{ std::fmod(angle < 0 ? -angle : angle ,360.0) }; 
+    double angleLeft = std::fmod(-angle,360.0);
+    double angleRight = 360.0 - std::fmod(angle,360.0); 
+    return units::degree_t{ angle > 0 ? angleLeft : angleRight}; 
 }
 
 frc::Rotation2d SwerveSubsystem::GetRotation2d() { return frc::Rotation2d{ GetHeading() }; }
@@ -103,7 +101,7 @@ void SwerveSubsystem::SetModulesState(wpi::array<frc::SwerveModuleState,4> state
 
 frc::ChassisSpeeds SwerveSubsystem::GetCurrentSpeeds()
 {
-    return Swerve::System::kDriveKinematics.ToChassisSpeeds(m_frontLeft.GetState(),m_frontRight.GetState(),m_backLeft.GetState(),m_backRight.GetState());
+    return Swerve::System::kDriveKinematics.ToChassisSpeeds({m_frontLeft.GetState(),m_frontRight.GetState(),m_backLeft.GetState(),m_backRight.GetState()});
 }
 
 void SwerveSubsystem::Drive(frc::ChassisSpeeds speed)

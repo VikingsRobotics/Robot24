@@ -6,9 +6,13 @@
 RampSubsystem::RampSubsystem()
 {
     SetName("Ramp Subsystem");
-    m_sweeperMotor.SetInverted(true);
+    m_sweeperMotor.SetInverted(false);
+    m_feederMotor.SetInverted(false);
     m_launcherLeftMotor.SetInverted(false);
     m_launcherRightMotor.SetInverted(true);
+#ifndef REMOVE_SOLENOID
+    SetRampUp();
+#endif
 
     SetDefaultCommand(frc2::RunCommand{
         [this]{
@@ -34,41 +38,47 @@ void RampSubsystem::Stop()
     m_launcherLeftMotor.Set(0);
 }
 
-void RampSubsystem::Gather()
+void RampSubsystem::Gather(double sweeper,double feeder)
 {
-    m_sweeperMotor.Set(.75);
-    m_feederMotor.Set(.7);
+    m_sweeperMotor.Set(sweeper);
+    m_feederMotor.Set(feeder);
 }
 
-void RampSubsystem::Eject()
+void RampSubsystem::Eject(double sweeper,double feeder)
 {
-    m_sweeperMotor.Set(-.7);
-    m_feederMotor.Set(-.5);
+    m_sweeperMotor.Set(-sweeper);
+    m_feederMotor.Set(-feeder);
 }
 
 void RampSubsystem::SpoolUpLaunchers()
 {
-    m_launcherLeftMotor.Set(1);
-    m_launcherRightMotor.Set(1);
+    m_launcherLeftMotor.Set(Ramp::kLauncherSpeedHigh);
+    m_launcherRightMotor.Set(Ramp::kLauncherSpeedHigh);
 }
 
 void RampSubsystem::SlowSpoolUpLaunchers()
 {
-    m_launcherLeftMotor.Set(0.4);
-    m_launcherRightMotor.Set(0.4);
+    m_launcherLeftMotor.Set(Ramp::kLauncherSpeedLow);
+    m_launcherRightMotor.Set(Ramp::kLauncherSpeedLow);
 }
 
 /// @brief This backs the note down so that it's not engaged with the launchers
 void RampSubsystem::StageNoteForLaunch()
 {
     m_sweeperMotor.Set(0);
-    m_feederMotor.Set(-.3);
+    m_feederMotor.Set(-Ramp::kRetreatSpeed);
+}
+
+void RampSubsystem::StageNoteForLaunchSlow()
+{
+    m_sweeperMotor.Set(0);
+    m_feederMotor.Set(-Ramp::kRetreatSpeedSlow);
 }
 
 /// @brief This pushes the note into the launchers. This is what actually sends the note flying.
 void RampSubsystem::Fire()
 {
-    m_feederMotor.Set(.4);
+    m_feederMotor.Set(Ramp::kLaunchSpeed);
 }
 #ifndef REMOVE_SOLENOID
 bool RampSubsystem::IsRampDown() 
@@ -98,9 +108,9 @@ void RampSubsystem::InitSendable(wpi::SendableBuilder& builder)
     builder.AddBooleanProperty("Feeder Motor Active", [this]{ return m_feederMotor.Get() != 0; }, nullptr);
     builder.AddDoubleProperty("Launcher Right Velocity",
         [this]{ return m_launcherRightMotor.Get(); },
-        [this](double value){ m_launcherRightMotor.Set(value); });
+        nullptr);
     builder.AddDoubleProperty("Launcher Left Velocity",
         [this]{ return m_launcherLeftMotor.Get(); },
-        [this](double value){ m_launcherLeftMotor.Set(value); });
+        nullptr);
     builder.AddBooleanProperty("Retreated", [this]{ return retreated; }, [this](bool value){ retreated = value; });
 }

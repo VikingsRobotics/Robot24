@@ -22,7 +22,7 @@ RampLaunchCommand::RampLaunchCommand(RampSubsystem* const subsystem,bool disable
     AddCommands(
         MoveLoaderDistanceCommand(Ramp::kRetreatTime,true),
         SetLauncherVelocityCommand(Ramp::kVelocityTime),
-        MoveLoaderDistanceCommand(2 * Ramp::kRetreatTime,false)
+        MoveLoaderDistanceCommand(Ramp::kLaunchTime,false)
     );
 }
 #ifndef REMOVE_SOLENOID
@@ -60,7 +60,8 @@ frc2::ParallelRaceGroup RampLaunchCommand::MoveLoaderDistanceCommand(units::seco
         return frc2::ParallelRaceGroup{
             frc2::FunctionalCommand{ 
                 [rampsub = this->m_subsystem]() {
-                    if(!rampsub->retreated) { rampsub->StageNoteForLaunch(); }
+                    if(!rampsub->retreated && rampsub->IsRampUp()) { rampsub->StageNoteForLaunch(); }
+                    else if(!rampsub->retreated && rampsub->IsRampDown()) { rampsub->StageNoteForLaunchSlow(); }
                 },
                 [](){},
                 [rampsub = this->m_subsystem](bool interrupted){
